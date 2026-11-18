@@ -1,0 +1,299 @@
+<title>Cajón 3D El Barri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Lato:wght@400;700&display=swap">
+<style>
+/* Escenario oscuro de una sola apariencia: el cajón como en un tablao, con un foco cálido. */
+:root {
+  --bg: #0d0b0a; --panel: #1a1614; --line: #3a302a; --fg: #f3ece4; --muted: #b3a597;
+  --gold: #e3b350; --mano-d: #d9483e; --mano-i: #3d8fd1;
+  --f-tit: 'Poppins', system-ui, sans-serif; --f-txt: 'Lato', system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--f-txt); }
+.pag { max-width: 760px; margin: 0 auto; padding-block: 18px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 14px; }
+.eyebrow { font: 600 12px/1.3 var(--f-tit); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin: 0; }
+h1 { font: 800 clamp(26px, 6vw, 36px)/1.1 var(--f-tit); margin: 2px 0 0; text-wrap: balance; }
+.intro { margin: 0; color: var(--muted); max-width: 62ch; }
+.escena { position: relative; width: 100%; aspect-ratio: 4 / 5; max-height: 72vh; border-radius: 14px; overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 20%, #2a201a 0%, #0d0b0a 70%); border: 1px solid var(--line); touch-action: none; }
+.escena canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.escena canvas:active { cursor: grabbing; }
+.pista { position: absolute; left: 12px; bottom: 10px; right: 12px; font-size: 13px; color: var(--muted); pointer-events: none; text-align: center; }
+.cuenta { position: absolute; top: 10px; right: 14px; font: 800 34px/1 var(--f-tit); color: var(--gold); font-variant-numeric: tabular-nums; }
+.mandos { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: 700 15px/1 var(--f-tit); border-radius: 999px; padding: 12px 18px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+button.prin { background: var(--gold); border-color: var(--gold); color: #1b1309; }
+button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.ventajas { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 4px 0 0; padding: 0; list-style: none; }
+.ventajas li { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.ventajas b { display: block; font: 600 14px/1.3 var(--f-tit); color: var(--gold); margin-bottom: 4px; }
+.aviso { font-size: 13px; color: var(--muted); margin: 0; }
+</style>
+
+<div class="pag">
+  <div>
+    <p class="eyebrow">Ejemplo · El Barri</p>
+    <h1>Así quedaría el cajón en 3D</h1>
+  </div>
+  <p class="intro">Arrástralo con el dedo para girarlo. Toca la tapa para oírla: arriba suena el agudo y en el centro el grave. Con «Tocar rumba» las manos tocan solas.</p>
+
+  <div class="escena" id="escena">
+    <div class="cuenta" id="cuenta" aria-live="polite"></div>
+    <div class="pista" id="pista">Cargando el cajón…</div>
+  </div>
+
+  <div class="mandos">
+    <button class="prin" id="btnTocar" type="button">▶ Tocar rumba</button>
+    <button id="btnToca" type="button">Vista del que toca</button>
+    <button id="btnFrente" type="button">Vista de frente</button>
+    <button id="btnGiro" type="button" aria-pressed="true">Girar solo</button>
+  </div>
+
+  <ul class="ventajas">
+    <li><b>Se ve desde cualquier lado</b>Desde arriba, como lo ve el que toca, o de frente, como lo ve el público.</li>
+    <li><b>Las manos se ven de verdad</b>Se ve qué mano va a cada sitio y a qué altura de la tapa.</li>
+    <li><b>Más vistoso</b>Llama más la atención para enseñarlo en Instagram o en clase.</li>
+  </ul>
+  <p class="aviso">Es un ejemplo con un cajón parecido al tuyo, no el definitivo. Las manos son sencillas a propósito.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const escena = $('#escena');
+if (!window.THREE) { $('#pista').textContent = 'No se ha podido cargar el 3D en este navegador.'; return; }
+const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- texturas dibujadas ---------- */
+function lienzo(w, h, pinta) { const c = document.createElement('canvas'); c.width = w; c.height = h; pinta(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t; }
+const ORO = '#c9a14a', MADERA = '#e3cfa6';
+function bordes(g, w, h, lados) {   /* canto de contrachapado */
+  g.fillStyle = MADERA; const e = Math.round(w * 0.035);
+  if (lados.includes('i')) g.fillRect(0, 0, e, h);
+  if (lados.includes('d')) g.fillRect(w - e, 0, e, h);
+  if (lados.includes('a')) g.fillRect(0, 0, w, e);
+  if (lados.includes('b')) g.fillRect(0, h - e, w, e);
+  g.strokeStyle = 'rgba(120,90,50,.5)'; g.lineWidth = 1;
+  for (let k = 1; k < 5; k++) { const y = (e / 5) * k;
+    if (lados.includes('i')) { g.beginPath(); g.moveTo(y, 0); g.lineTo(y, h); g.stroke(); }
+    if (lados.includes('d')) { g.beginPath(); g.moveTo(w - y, 0); g.lineTo(w - y, h); g.stroke(); } }
+}
+function negro(g, w, h) {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#2a2a2a'); gr.addColorStop(.55, '#151515'); gr.addColorStop(1, '#0b0b0b');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 1800; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.025})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+}
+function tornillo(g, x, y, r) {
+  g.fillStyle = '#9b9b9b'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  g.strokeStyle = '#3c3c3c'; g.lineWidth = r * 0.35; g.beginPath(); g.moveTo(x - r * .6, y); g.lineTo(x + r * .6, y); g.moveTo(x, y - r * .6); g.lineTo(x, y + r * .6); g.stroke();
+}
+const texTapa = lienzo(600, 960, (g, w, h) => {
+  negro(g, w, h);
+  g.strokeStyle = ORO; g.lineWidth = 5; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(60, 220); g.lineTo(60, 100); g.lineTo(215, 100); g.stroke();
+  g.beginPath(); g.moveTo(385, 100); g.lineTo(540, 100); g.lineTo(540, 220); g.stroke();
+  g.beginPath(); g.moveTo(60, 700); g.lineTo(60, 800); g.lineTo(110, 800); g.stroke();
+  g.beginPath(); g.moveTo(490, 800); g.lineTo(540, 800); g.lineTo(540, 700); g.stroke();
+  g.fillStyle = ORO; g.font = 'italic 800 54px Poppins, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('PRO', 300, 102);
+  /* pegatina de Instagram centrada abajo */
+  g.fillStyle = '#fff'; g.font = '800 46px Lato, sans-serif'; g.textAlign = 'left';
+  const txt = '@barricajondm', tw = g.measureText(txt).width, ic = 48, x0 = 300 - (tw + ic + 14) / 2, y0 = 870;
+  g.strokeStyle = '#fff'; g.lineWidth = 5; const r = 13;
+  g.beginPath(); g.moveTo(x0 + r, y0 - ic / 2); g.arcTo(x0 + ic, y0 - ic / 2, x0 + ic, y0 + ic / 2, r); g.arcTo(x0 + ic, y0 + ic / 2, x0, y0 + ic / 2, r);
+  g.arcTo(x0, y0 + ic / 2, x0, y0 - ic / 2, r); g.arcTo(x0, y0 - ic / 2, x0 + ic, y0 - ic / 2, r); g.stroke();
+  g.beginPath(); g.arc(x0 + ic / 2, y0, 11, 0, 7); g.stroke(); g.beginPath(); g.arc(x0 + ic - 11, y0 - ic / 2 + 11, 3.5, 0, 7); g.fill();
+  g.fillText(txt, x0 + ic + 14, y0 + 2);
+  [[70, 40], [195, 32], [300, 30], [405, 32], [530, 40], [36, 260], [36, 470], [36, 680], [564, 260], [564, 470], [564, 680],
+   [70, 925], [195, 930], [300, 932], [405, 930], [530, 925]].forEach(([x, y]) => tornillo(g, x, y, 9));
+});
+const texLado = lienzo(600, 960, (g, w, h) => {
+  negro(g, w, h); bordes(g, w, h, 'id');
+  g.save(); g.translate(w - 110, 150); g.fillStyle = '#e9e9e9'; g.font = 'italic 800 64px Poppins, sans-serif'; g.textAlign = 'center'; g.fillText('PRO', 0, 0); g.restore();
+});
+const texLado2 = lienzo(600, 960, (g, w, h) => { negro(g, w, h); bordes(g, w, h, 'id'); });
+const texTras = lienzo(600, 960, (g, w, h) => {
+  negro(g, w, h); bordes(g, w, h, 'idab');
+  const gr = g.createRadialGradient(300, 330, 10, 300, 330, 120); gr.addColorStop(0, '#000'); gr.addColorStop(.85, '#050505'); gr.addColorStop(1, '#2a2a2a');
+  g.fillStyle = gr; g.beginPath(); g.arc(300, 330, 118, 0, 7); g.fill();
+  g.strokeStyle = MADERA; g.lineWidth = 6; g.stroke();
+});
+const texArriba = lienzo(600, 600, (g, w, h) => { negro(g, w, h); bordes(g, w, h, 'idab'); });
+
+/* ---------- escena ---------- */
+const ren = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+ren.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+ren.outputEncoding = THREE.sRGBEncoding;
+escena.appendChild(ren.domElement);
+const sc = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(32, 1, 0.05, 20);
+sc.add(new THREE.HemisphereLight(0xfff1dd, 0x221810, 0.75));
+const foco = new THREE.DirectionalLight(0xffe2b8, 1.0); foco.position.set(0.8, 1.6, 1.4); sc.add(foco);
+const relleno = new THREE.DirectionalLight(0x9fc3ff, 0.35); relleno.position.set(-1.2, 0.6, -0.8); sc.add(relleno);
+
+const W = 0.30, H = 0.48, D = 0.30;
+const cajon = new THREE.Group(); sc.add(cajon);
+const mat = t => new THREE.MeshStandardMaterial({ map: t, roughness: 0.62, metalness: 0.05 });
+[texTapa, texTras, texLado, texLado2, texArriba].forEach(t => t.encoding = THREE.sRGBEncoding);
+const caja = new THREE.Mesh(new THREE.BoxGeometry(W, H, D),
+  [mat(texLado), mat(texLado2), mat(texArriba), new THREE.MeshStandardMaterial({ color: 0x111111 }), mat(texTapa), mat(texTras)]);
+caja.position.y = H / 2 + 0.012; cajon.add(caja);
+const pataG = new THREE.CylinderGeometry(0.014, 0.016, 0.012, 20), pataM = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: .9 });
+[[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([x, z]) => { const p = new THREE.Mesh(pataG, pataM); p.position.set(x * (W / 2 - 0.03), 0.006, z * (D / 2 - 0.03)); cajon.add(p); });
+/* sombra en el suelo */
+const sombra = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false,
+  map: lienzo(256, 256, (g) => { const gr = g.createRadialGradient(128, 128, 10, 128, 128, 128); gr.addColorStop(0, 'rgba(0,0,0,.75)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); }) }));
+sombra.rotation.x = -Math.PI / 2; sombra.position.y = 0.001; sc.add(sombra);
+
+/* ---------- manos ---------- */
+function mano(color, letra) {
+  const g = new THREE.Group(), m = new THREE.MeshStandardMaterial({ color, roughness: .5 });
+  const palma = new THREE.Mesh(new THREE.SphereGeometry(0.045, 24, 16), m); palma.scale.set(1, 1.15, 0.38); g.add(palma);
+  [-0.027, -0.009, 0.009, 0.027].forEach((x, k) => {
+    const largo = [0.05, 0.06, 0.058, 0.046][k];
+    const dedo = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0085, largo, 12), m); dedo.position.set(x, 0.05 + largo / 2, 0); g.add(dedo);
+    const punta = new THREE.Mesh(new THREE.SphereGeometry(0.0085, 12, 8), m); punta.position.set(x, 0.05 + largo, 0); g.add(punta);
+  });
+  const etiqueta = new THREE.Mesh(new THREE.PlaneGeometry(0.04, 0.04), new THREE.MeshBasicMaterial({ transparent: true,
+    map: lienzo(128, 128, (c) => { c.fillStyle = '#fff'; c.font = '800 90px Poppins, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(letra, 64, 70); }) }));
+  etiqueta.position.z = 0.019; g.add(etiqueta);
+  g.userData = { golpe: -1, base: new THREE.Vector3(), objetivo: new THREE.Vector3() };
+  cajon.add(g); return g;
+}
+const MANOS = { D: mano(0xd9483e, 'D'), I: mano(0x3d8fd1, 'I') };
+const zFrente = D / 2;
+const SITIO = { a: y => H - 0.07, g: y => H * 0.55 };
+function reposo(m, lado) { m.userData.base.set(lado * 0.075, H * 0.42, zFrente + 0.09); m.position.copy(m.userData.base); m.rotation.set(-0.15, 0, 0); }
+reposo(MANOS.D, 1); reposo(MANOS.I, -1);
+
+/* ondas sobre la tapa */
+const ondas = [];
+function onda(x, y, fuerte) {
+  const m = new THREE.Mesh(new THREE.RingGeometry(0.012, 0.016, 40), new THREE.MeshBasicMaterial({ color: fuerte ? 0xff6a5c : 0xf1d99a, transparent: true, depthWrite: false }));
+  m.position.set(x, y + 0.012, zFrente + 0.001); cajon.add(m); ondas.push({ m, t0: performance.now(), fin: fuerte ? 3.2 : 2.2 });
+}
+
+/* ---------- sonido sintetizado (el mismo de la app) ---------- */
+let ctx, bus, ruido, satur;
+function audio() {
+  if (ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(ctx.destination);
+  bus = ctx.createGain(); bus.gain.value = 0.9; bus.connect(comp);
+  satur = ctx.createWaveShaper(); const cv = new Float32Array(1024);
+  for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; cv[i] = Math.tanh(3 * x) / Math.tanh(3); } satur.curve = cv; satur.connect(bus);
+  ruido = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = ruido.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+function env(g, t, p, dec) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(p, 0.0002), t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dec); }
+function rf(t, tipo, fr, q, p, dec) { const s = ctx.createBufferSource(); s.buffer = ruido; const f = ctx.createBiquadFilter(); f.type = tipo; f.frequency.value = fr; f.Q.value = q;
+  const g = ctx.createGain(); env(g, t, p, dec); s.connect(f).connect(g).connect(bus); s.start(t); s.stop(t + dec + 0.05); }
+function tono(t, f0, f1, tipo, p, dec, dest) { const o = ctx.createOscillator(); o.type = tipo; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dec * 0.6);
+  const g = ctx.createGain(); env(g, t, p, dec); o.connect(g).connect(dest || bus); o.start(t); o.stop(t + dec + 0.05); }
+const SON = {
+  g: (t, v) => { v *= 0.6; tono(t, 140, 70, 'sine', 0.5 * v, 0.35); tono(t, 150, 80, 'sine', 0.45 * v, 0.28, satur); tono(t, 300, 160, 'triangle', 0.22 * v, 0.12); rf(t, 'bandpass', 260, 1.2, 0.6 * v, 0.09); rf(t, 'lowpass', 900, 0.7, 0.2 * v, 0.03); },
+  a: (t, v) => { rf(t, 'bandpass', 2300, 0.9, 0.75 * v, 0.09); rf(t, 'highpass', 5000, 0.5, 0.28 * v, 0.2); tono(t, 340, 260, 'triangle', 0.25 * v, 0.05); },
+};
+
+/* ---------- golpe: mano + onda ---------- */
+function golpear(lado, s, fuerte, x) {
+  const m = MANOS[lado], y = SITIO[s]();
+  m.userData.objetivo.set(x != null ? x : (lado === 'D' ? 0.06 : -0.06), y - (s === 'a' ? 0.05 : 0.02), zFrente + 0.012);
+  m.userData.golpe = performance.now();
+  onda(m.userData.objetivo.x, y, fuerte);
+}
+
+/* ---------- ritmo: rumba básica ---------- */
+const RUMBA = ['g^', 'a', 'a', 'a^', 'a', 'a', 'a^', 'a'], BPM = 92;
+const R = { on: false, sig: 0, i: 0, cola: [], timer: 0 };
+function programar() {
+  while (R.sig < ctx.currentTime + 0.12) {
+    const tok = RUMBA[R.i], s = tok[0], ac = tok.includes('^');
+    SON[s](R.sig, ac ? 1 : 0.6);
+    R.cola.push({ t: R.sig, s, ac, lado: R.i % 2 ? 'I' : 'D', n: R.i });
+    R.sig += 60 / BPM / 2; R.i = (R.i + 1) % RUMBA.length;
+  }
+}
+function tocar() {
+  audio(); ctx.resume();
+  if (R.on) { R.on = false; clearInterval(R.timer); R.cola = []; $('#btnTocar').textContent = '▶ Tocar rumba'; $('#cuenta').textContent = ''; return; }
+  Object.assign(R, { on: true, sig: ctx.currentTime + 0.1, i: 0, cola: [] });
+  R.timer = setInterval(programar, 25); programar();
+  $('#btnTocar').textContent = '■ Parar';
+  ponerVista('toca');
+}
+$('#btnTocar').addEventListener('click', tocar);
+
+/* ---------- vistas y giro ---------- */
+let giro = !reducido, rotY = 0.6, rotX = 0, objY = null, objX = null;
+const camaras = { frente: { pos: [0, 0.32, 1.45], mira: [0, 0.24, 0] }, toca: { pos: [0, 1.12, 1.0], mira: [0, 0.24, 0.04] } };
+let vista = 'frente';
+function ponerVista(v) { vista = v; objY = 0; objX = 0; if (v === 'toca') setGiro(false); }
+function setGiro(v) { giro = v; $('#btnGiro').setAttribute('aria-pressed', String(v)); }
+$('#btnGiro').setAttribute('aria-pressed', String(giro));
+$('#btnGiro').addEventListener('click', () => setGiro(!giro));
+$('#btnToca').addEventListener('click', () => ponerVista('toca'));
+$('#btnFrente').addEventListener('click', () => ponerVista('frente'));
+const camPos = new THREE.Vector3(...camaras.frente.pos), camMira = new THREE.Vector3(...camaras.frente.mira);
+
+/* arrastrar para girar · tocar la tapa para oírla */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+let arr = null;
+ren.domElement.addEventListener('pointerdown', e => { arr = { x: e.clientX, y: e.clientY, ry: rotY, rx: rotX, mov: false }; ren.domElement.setPointerCapture(e.pointerId); });
+ren.domElement.addEventListener('pointermove', e => {
+  if (!arr) return; const dx = e.clientX - arr.x, dy = e.clientY - arr.y;
+  if (Math.abs(dx) + Math.abs(dy) > 6) { arr.mov = true; setGiro(false); objY = objX = null; }
+  if (arr.mov) { rotY = arr.ry + dx * 0.01; rotX = Math.max(-0.5, Math.min(0.5, arr.rx + dy * 0.005)); }
+});
+ren.domElement.addEventListener('pointerup', e => {
+  const a = arr; arr = null; if (!a || a.mov) return;
+  const r = ren.domElement.getBoundingClientRect();
+  ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ptr, cam);
+  const hit = ray.intersectObject(caja)[0]; if (!hit) return;
+  const local = cajon.worldToLocal(hit.point.clone());
+  if (hit.face && hit.face.materialIndex !== 4) return;   /* solo la tapa */
+  audio(); ctx.resume();
+  const yRel = local.y - 0.012, s = yRel > H - 0.12 ? 'a' : 'g';
+  SON[s](ctx.currentTime + 0.01, 1);
+  golpear(local.x >= 0 ? 'D' : 'I', s, false, local.x);
+});
+
+/* ---------- animación ---------- */
+function tam() { const r = escena.getBoundingClientRect(); ren.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; cam.updateProjectionMatrix(); }
+addEventListener('resize', tam); tam();
+$('#pista').textContent = 'Arrastra para girar · toca la tapa';
+const tmp = new THREE.Vector3();
+function cuadro(now) {
+  if (R.on && ctx) {
+    const ahora = ctx.currentTime - (ctx.outputLatency || 0);
+    while (R.cola.length && R.cola[0].t <= ahora) { const e = R.cola.shift(); golpear(e.lado, e.s, e.ac);
+      if (e.n % 2 === 0) $('#cuenta').textContent = e.n / 2 + 1; }
+  }
+  if (giro && !arr) rotY += 0.004;
+  if (objY != null) { rotY += (objY - (((rotY + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI)) * 0.08; rotX += (objX - rotX) * 0.08; }
+  cajon.rotation.y = rotY; cajon.rotation.x = rotX; sombra.rotation.z = -rotY;
+  const c = camaras[vista];
+  camPos.lerp(tmp.set(...c.pos), 0.06); camMira.lerp(tmp.set(...c.mira), 0.06);
+  cam.position.copy(camPos); cam.lookAt(camMira);
+  for (const m of Object.values(MANOS)) {   /* la mano baja rápido a la tapa y vuelve suave */
+    const u = m.userData, dt = (now - u.golpe) / 1000;
+    if (u.golpe < 0 || dt > 0.32) { m.position.lerp(u.base, 0.15); m.rotation.x += (-0.15 - m.rotation.x) * 0.15; continue; }
+    const k = dt < 0.05 ? dt / 0.05 : 1 - (dt - 0.05) / 0.27;
+    m.position.lerpVectors(u.base, u.objetivo, Math.max(0, Math.min(1, k)));
+    m.rotation.x = -0.15 + 0.1 * k;
+  }
+  for (let i = ondas.length - 1; i >= 0; i--) { const o = ondas[i], t = (now - o.t0) / 450;
+    if (t >= 1) { cajon.remove(o.m); o.m.geometry.dispose(); o.m.material.dispose(); ondas.splice(i, 1); continue; }
+    o.m.scale.setScalar(1 + t * o.fin); o.m.material.opacity = 0.9 * (1 - t); }
+  ren.render(sc, cam);
+  requestAnimationFrame(cuadro);
+}
+requestAnimationFrame(cuadro);
+})();
+</script>
