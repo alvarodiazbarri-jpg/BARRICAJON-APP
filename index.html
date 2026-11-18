@@ -254,7 +254,9 @@ details.bt .vol { margin-top: 8px; }
 /* ---------- ejercicios (del cuaderno) ----------
    Cada golpe: letra del sonido (g grave, a agudo, p platillo, c caja, f fantasma), mano D/I y ^ si lleva acento; «-» es silencio.
    compas = pulsos por compás; sub = golpes por pulso (1 negra, 2 corchea, 3 tresillo, 4 semicorchea). */
-const PARTES = { 1: 'Notas y ejercicios básicos', 2: 'Ejercicios con corcheas', 6: 'Dobles y paradiddles', 11: 'Soleá y alegrías' };
+const PARTES = { 1: 'Notas y ejercicios básicos', 2: 'Ejercicios con corcheas', 3: 'Tresillos y semicorcheas', 4: 'Mezcla de notas básicas',
+  5: 'Silencios y síncopa', 6: 'Dobles y paradiddles', 7: 'Dinámicas y técnica', 8: 'Rumbas', 9: 'Tangos', 10: 'Bulerías', 11: 'Soleá y alegrías',
+  12: 'Sevillanas y chirigota', 13: 'Rellenos, compases e independencia', 14: 'Lectura a primera vista', 15: 'Para la clase' };
 const NIVELES = { 1: 'Nivel 1 · Primeros golpes', 2: 'Nivel 2 · Corcheas y manos', 3: 'Nivel 3 · Palos de 12' };
 const SOLEA = [3, 6, 8, 10, 12];
 const rep = (n, f) => Array.from({ length: n }, (_, i) => f(i)).join(' ');
@@ -275,16 +277,95 @@ const EJ = [
   { id: 'p2-cor', parte: 2, nivel: 2, titulo: 'Ejercicio con corcheas', compas: 4, sub: 2, bpm: 60, txt: 'aD aD aI aI aD aI aD aI', nota: 'Cada pulso se divide en dos: el pulso y la «y». La «y» cae justo en la mitad.' },
   { id: 'p2-ds1', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 1', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD aI aD - aD -', nota: 'La derecha toca en el pulso y la izquierda en la «y». Mantén la mano en movimiento aunque no suene.' },
   { id: 'p2-ds2', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 2', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD - aD aI aD -' },
+  { id: 'p2-ds3', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 3', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD - aD - aD aI' },
+  { id: 'p2-ds4', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 4', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD aI aD - aD aI' },
   { id: 'p2-ds5', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 5', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD aI aD aI aD aI' },
+  { id: 'p2-ds6', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 6', compas: 4, sub: 2, bpm: 60, txt: 'aD aI aD - aD aI aD -' },
   { id: 'p2-ds7', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 7', compas: 4, sub: 2, bpm: 60, txt: 'aD aI aD aI aD aI aD -' },
+  { id: 'p2-con', parte: 2, nivel: 2, titulo: 'Corcheas continuas', compas: 4, bpm: 60, txt: 'aD aI aD aI [aD aI] [aD aI] [aD aI] [aD aI] [gD aI] [aD aI] [aD aI] [aD aI]', nota: 'Un compás de negras, uno de corcheas y otro de corcheas con grave en el 1. Variantes: cambia la corchea de tiempo, agudos por graves, mete acentos.' },
+  { id: 'p3-tre', parte: 3, nivel: 2, titulo: 'Tresillos', compas: 4, sub: 3, bpm: 50, txt: 'aD aI aD aI aD aI aD aI aD aI aD aI', nota: 'Las manos se alternan y el pulso cambia de mano en cada tiempo: D I D · I D I.' },
+  { id: 'p3-t1', parte: 3, nivel: 2, titulo: 'Tresillos con grave 1', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aD aI aD aI aD aI aD aI aD aI' },
+  { id: 'p3-t2', parte: 3, nivel: 2, titulo: 'Tresillos con grave 2', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aD aI aD aI gD aI aD aI aD aI' },
+  { id: 'p3-t3', parte: 3, nivel: 2, titulo: 'Tresillos con grave 3', compas: 4, sub: 3, bpm: 50, txt: 'aD aI aD gI aD aI aD aI aD aI aD aI' },
+  { id: 'p3-t4', parte: 3, nivel: 2, titulo: 'Tresillos con grave 4', compas: 4, sub: 3, bpm: 50, txt: 'aD aI aD gI aD aI aD aI aD gI aD aI' },
+  { id: 'p3-t5', parte: 3, nivel: 2, titulo: 'Tresillos con grave 5', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aD gI aD aI aD aI aD aI aD aI' },
+  { id: 'p3-t6', parte: 3, nivel: 2, titulo: 'Tresillos con grave 6', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aD aI aD aI aD aI aD gI aD aI' },
+  { id: 'p3-t7', parte: 3, nivel: 2, titulo: 'Tresillos con grave 7', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aD aI aD aI gD aI aD gI aD aI' },
+  { id: 'p3-t8', parte: 3, nivel: 2, titulo: 'Tresillos con grave 8', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aD gI aD aI aD aI aD gI aD aI' },
+  { id: 'p3-t9', parte: 3, nivel: 2, titulo: 'Tresillos con grave en todos los pulsos', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aD gI aD aI gD aI aD gI aD aI', nota: 'Después: graves donde no hay pulso, y acentos.' },
+  { id: 'p3-sem', parte: 3, nivel: 2, titulo: 'Semicorcheas', compas: 4, sub: 4, bpm: 50, txt: 'aD aI aD aI aD aI aD aI aD aI aD aI aD aI aD aI' },
+  { id: 'p3-sg', parte: 3, nivel: 2, titulo: 'Semicorcheas · grave en 1 y 3', compas: 4, sub: 4, bpm: 50, txt: 'gD aI aD aI aD aI aD aI gD aI aD aI aD aI aD aI', nota: 'Mismos ejercicios que con tresillos, metiendo grave en los pulsos.' },
+  { id: 'p4-neg', parte: 4, nivel: 2, titulo: 'Mezcla · negras', compas: 4, sub: 1, bpm: 60, txt: 'aD aI aD aI', nota: 'Fíjate en qué mano cae el pulso. Figuras pares (negras, corcheas, semicorcheas): el pulso siempre en la misma mano.' },
+  { id: 'p4-cor', parte: 4, nivel: 2, titulo: 'Mezcla · corcheas', compas: 4, sub: 2, bpm: 60, txt: 'aD aI aD aI aD aI aD aI', nota: 'El pulso siempre en la derecha.' },
+  { id: 'p4-tre', parte: 4, nivel: 2, titulo: 'Mezcla · tresillos', compas: 4, sub: 3, bpm: 60, txt: 'aD aI aD aI aD aI aD aI aD aI aD aI', nota: 'Figuras impares (tresillos): el pulso cae cada vez en una mano.' },
+  { id: 'p4-sem', parte: 4, nivel: 2, titulo: 'Mezcla · semicorcheas', compas: 4, sub: 4, bpm: 60, txt: 'aD aI aD aI aD aI aD aI aD aI aD aI aD aI aD aI', nota: 'El pulso siempre en la derecha.' },
+  { id: 'p4-tod', parte: 4, nivel: 2, titulo: 'Mezcla · las cuatro figuras seguidas', compas: 4, bpm: 50, txt: 'aD aI aD aI [aD aI] [aD aI] [aD aI] [aD aI] [aD aI aD] [aI aD aI] [aD aI aD] [aI aD aI] [aD aI aD aI] [aD aI aD aI] [aD aI aD aI] [aD aI aD aI]', nota: 'Negras, corcheas, tresillos y semicorcheas sin parar el pulso.' },
+  { id: 'p5-sn1', parte: 5, nivel: 2, titulo: 'Silencio de negra 1', compas: 4, sub: 1, bpm: 70, txt: 'aD aI aD -', nota: 'Cuenta el silencio en voz alta y mantén la mano en movimiento aunque no suene.' },
+  { id: 'p5-sn2', parte: 5, nivel: 2, titulo: 'Silencio de negra 2', compas: 4, sub: 1, bpm: 70, txt: 'aD - aD aI' },
+  { id: 'p5-sn3', parte: 5, nivel: 2, titulo: 'Silencio de negra 3', compas: 4, sub: 1, bpm: 70, txt: 'aD - aD -' },
+  { id: 'p5-sn4', parte: 5, nivel: 2, titulo: 'Silencio de negra 4', compas: 4, sub: 1, bpm: 70, txt: '- aI aD aI' },
+  { id: 'p5-sc1', parte: 5, nivel: 2, titulo: 'Silencio de corchea 1', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD - aD - aD -' },
+  { id: 'p5-sc2', parte: 5, nivel: 2, titulo: 'Silencio de corchea 2', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD aI aD - aD aI' },
+  { id: 'p5-sc3', parte: 5, nivel: 2, titulo: 'Silencio de corchea 3', compas: 4, sub: 2, bpm: 60, txt: 'gD - aD aI gD - aD aI' },
+  { id: 'p5-sc4', parte: 5, nivel: 2, titulo: 'Silencio de corchea 4', compas: 4, sub: 2, bpm: 60, txt: 'aD aI aD - aD aI aD -' },
+  { id: 'p5-y', parte: 5, nivel: 2, titulo: 'Solo la «y»', compas: 4, sub: 2, bpm: 60, txt: '- aI - aI - aI - aI', nota: 'Contratiempo: el golpe va en la «y». La derecha sigue marcando el pulso en el aire.' },
+  { id: 'p5-ay', parte: 5, nivel: 2, titulo: 'Acento en la «y»', compas: 4, sub: 2, bpm: 60, txt: 'aD aI^ aD aI^ aD aI^ aD aI^' },
+  { id: 'p5-pc', parte: 5, nivel: 2, titulo: 'Pulso y contratiempo', compas: 4, sub: 2, bpm: 60, txt: 'gD - - aI gD - - aI' },
+  { id: 'p5-sin', parte: 5, nivel: 2, titulo: 'Síncopa', compas: 4, sub: 2, bpm: 60, txt: 'gD aI - aI gD aI - aI', nota: 'Practica con el metrónomo y sin él, cantando el silencio.' },
   { id: 'p6-dag', parte: 6, nivel: 2, titulo: 'Dobles con corcheas · agudo', compas: 4, sub: 2, bpm: 60, txt: 'aD aD aI aI aD aD aI aI', nota: 'Empieza despacio y sube el tempo poco a poco.' },
+  { id: 'p6-dgr', parte: 6, nivel: 2, titulo: 'Dobles con corcheas · grave', compas: 4, sub: 2, bpm: 60, txt: 'gD gD gI gI gD gD gI gI' },
   { id: 'p6-dmx', parte: 6, nivel: 2, titulo: 'Dobles con corcheas · mixto', compas: 4, sub: 2, bpm: 60, txt: 'gD aD gI aI gD aD gI aI', nota: 'El primero de cada doble, grave; el segundo, agudo.' },
   { id: 'p6-par', parte: 6, nivel: 2, titulo: 'Paradiddle sencillo', compas: 4, sub: 4, bpm: 50, txt: 'aD aI aD aD aI aD aI aI aD aI aD aD aI aD aI aI', nota: 'D I D D · I D I I. La primera mano de cada grupo cambia en cada pulso.' },
   { id: 'p6-pac', parte: 6, nivel: 2, titulo: 'Paradiddle con acento', compas: 4, sub: 4, bpm: 50, txt: 'aD^ aI aD aD aI^ aD aI aI aD^ aI aD aD aI^ aD aI aI', nota: 'El acento «viaja» de una mano a la otra en cada pulso.' },
+  { id: 'p6-pgr', parte: 6, nivel: 2, titulo: 'Paradiddle con grave', compas: 4, sub: 4, bpm: 50, txt: 'gD aI aD aD gI aD aI aI gD aI aD aD gI aD aI aI' },
+  { id: 'p7-p', parte: 7, nivel: 2, titulo: 'Piano (suave)', compas: 4, sub: 1, bpm: 70, txt: 'aD aI aD aI', din: [0.25, 0.25], nota: 'p = suave. Mismo golpe, menos altura de mano.' },
+  { id: 'p7-mf', parte: 7, nivel: 2, titulo: 'Mezzoforte (medio)', compas: 4, sub: 1, bpm: 70, txt: 'aD aI aD aI', din: [0.55, 0.55] },
+  { id: 'p7-f', parte: 7, nivel: 2, titulo: 'Forte (fuerte)', compas: 4, sub: 1, bpm: 70, txt: 'aD aI aD aI', din: [1, 1], nota: 'f = fuerte, sin apretar: hombros y codos sueltos.' },
+  { id: 'p7-cre', parte: 7, nivel: 2, titulo: 'Crescendo: de suave a fuerte', compas: 4, sub: 1, bpm: 70, txt: 'aD aI aD aI', din: [0.2, 1] },
+  { id: 'p7-dim', parte: 7, nivel: 2, titulo: 'Diminuendo con corcheas', compas: 4, sub: 2, bpm: 60, txt: 'aD aI aD aI aD aI aD aI', din: [1, 0.2] },
+  { id: 'p7-cal', parte: 7, nivel: 2, titulo: 'Calidad de sonido', compas: 4, sub: 1, bpm: 60, txt: 'gD gI gD gI gD gI gD gI aD aI aD aI aD aI aD aI gD gI gD gI aD aI aD aI', nota: '8 graves lentos y 8 agudos lentos, escuchando que todos suenen igual. Después alterna: 4 graves, 4 agudos. Grave: mano abierta hacia el centro, que el golpe «respire». Agudo: dedos al borde superior, golpe seco y corto.' },
+  { id: 'p8-bas', parte: 8, nivel: 3, titulo: 'Rumba básica', compas: 4, sub: 2, bpm: 80, txt: 'g^ a a a^ a a a^ a', nota: 'Puntos de referencia: corcheas 1, 4 y 7.' },
+  { id: 'p8-cat', parte: 8, nivel: 3, titulo: 'Rumba catalana', compas: 4, sub: 2, bpm: 80, txt: 'g a a^ a g a a^ a', nota: 'Puntos de referencia: corcheas 3 y 7.' },
+  { id: 'p8-tum', parte: 8, nivel: 3, titulo: 'Rumba · tumbao', compas: 4, sub: 2, bpm: 80, txt: 'a a a^ g^ a a g^ a', nota: 'Puntos de referencia: corcheas 3, 4 y 7.' },
+  { id: 'p8-caj', parte: 8, nivel: 3, titulo: 'Rumba con caja', compas: 4, sub: 2, bpm: 80, txt: 'aD aD cI^ gD^ aD aI gD^ aI', nota: 'El golpe de caja va con la izquierda en el pulso 2.' },
+  { id: 'p8-bf', parte: 8, nivel: 3, titulo: 'Rumba básica con fantasmas', compas: 4, sub: 2, bpm: 80, txt: 'g^ f a a^ a f a^ f', nota: 'El golpe fantasma es un toque muy suave, casi sin sonido: mantiene el movimiento de la mano y da «aire» al patrón.' },
+  { id: 'p8-cf', parte: 8, nivel: 3, titulo: 'Rumba catalana con fantasmas', compas: 4, sub: 2, bpm: 80, txt: 'g f a^ a g f a^ f' },
+  { id: 'p9-bas', parte: 9, nivel: 3, titulo: 'Tangos · base', compas: 4, sub: 1, bpm: 80, txt: 'gD^ aI gD^ aI', nota: 'Compás de 4 marcado: los pulsos fuertes son el 1 y el 3. Toca cada variante cuatro veces y encadénalas sin parar el pulso.' },
+  { id: 'p9-cor', parte: 9, nivel: 3, titulo: 'Tangos con corcheas', compas: 4, sub: 2, bpm: 80, txt: 'gD^ aI aD aI gD^ aI aD aI' },
+  { id: 'p9-con', parte: 9, nivel: 3, titulo: 'Tangos con contratiempos', compas: 4, sub: 2, bpm: 80, txt: 'gD^ aI - aI gD^ aI - aI' },
+  { id: 'p9-rel', parte: 9, nivel: 3, titulo: 'Tangos con relleno en el pulso 4', compas: 4, sub: 4, bpm: 70, txt: 'gD^ - aI - aD - aI - gD^ - aI - aD aI aD aI' },
+  { id: 'p10-r1', parte: 10, nivel: 3, titulo: 'Bulerías · ritmo 1', compas: 12, sub: 2, bpm: 100, cuenta: [1, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    txt: rep(12, i => ([2, 5, 8, 10, 12].includes(i + 1) ? 'gD^' : 'aD') + ' aI'), nota: 'Se cuenta 1, 2, 1, 2, 3 … hasta 10. Cada tiempo con dos corcheas (D I); los graves y los acentos marcan el compás.' },
+  { id: 'p10-r2', parte: 10, nivel: 3, titulo: 'Bulerías · ritmo 2', compas: 12, sub: 2, bpm: 100, cuenta: [1, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    txt: rep(12, i => ({ 2: 'gD^', 5: 'gD^', 9: 'aD^', 10: 'gD^', 12: 'gD' }[i + 1] || 'aD') + ' aI') },
   { id: 'p11-neg', parte: 11, nivel: 3, titulo: 'Soleá · base con negras', compas: 12, sub: 1, bpm: 90,
     txt: rep(12, i => (SOLEA.includes(i + 1) ? 'g^' : 'a')), nota: 'Cuenta del 1 al 12 con acentos en 3 · 6 · 8 · 10 · 12. El metrónomo marca esos acentos.' },
   { id: 'p11-cor', parte: 11, nivel: 3, titulo: 'Soleá con corcheas', compas: 12, sub: 2, bpm: 70,
     txt: rep(12, i => (SOLEA.includes(i + 1) ? 'gD^' : 'aD') + ' aI'), nota: 'Las alegrías llevan el mismo compás y acentos a tempo vivo: sube el metrónomo poco a poco.' },
+  { id: 'p12-sev', parte: 12, nivel: 3, titulo: 'Sevillanas · 3 tiempos', compas: 3, sub: 2, bpm: 70, txt: 'gD aI aD aI^ aD aI', nota: 'Compás de tres tiempos con el acento en la «y» del 2.' },
+  { id: 'p12-chi', parte: 12, nivel: 3, titulo: 'Chirigota', compas: 4, bpm: 70, txt: '[gD aI] [gD aI] [gD - aD aI] [aD aI - -]', nota: 'Ojo: en los pulsos 3 y 4 el pulso se divide en cuatro (semicorcheas): cuenta 1 2 3 4 dentro de cada pulso.' },
+  { id: 'p13-r1', parte: 13, nivel: 3, titulo: 'Relleno de un pulso', compas: 4, bpm: 70, txt: '[gD^ aI] [aD aI] [gD aI] [aD aI aD aI]', nota: 'Rellenos de transición: sirven para enlazar un patrón con el siguiente.' },
+  { id: 'p13-r2', parte: 13, nivel: 3, titulo: 'Relleno de dos pulsos', compas: 4, bpm: 70, txt: '[gD^ aI] [aD aI] [aD aI aD] [aI aD aI]' },
+  { id: 'p13-rc', parte: 13, nivel: 3, titulo: 'Relleno de un compás', compas: 4, sub: 4, bpm: 60, txt: 'aD aI aD aI aD aI aD aI aD aI aD aI gD^ aI aD aI' },
+  { id: 'p13-c1', parte: 13, nivel: 3, titulo: 'Cambio de compás · 4 y 3 tiempos', compas: 7, sub: 1, bpm: 70, cuenta: [1, 2, 3, 4, 1, 2, 3], fuertes: [1, 5], barras: [4],
+    txt: 'gD^ aI aD aI gD^ aI aD', nota: 'Un compás de 4 y otro de 3, sin parar el pulso. El metrónomo marca fuerte cada «1».' },
+  { id: 'p13-c2', parte: 13, nivel: 3, titulo: 'Cambio de compás con corcheas', compas: 7, sub: 2, bpm: 60, cuenta: [1, 2, 3, 4, 1, 2, 3], fuertes: [1, 5], barras: [4],
+    txt: 'gD^ aI aD aI gD aI aD aI gD^ aI aD aI aD aI' },
+  { id: 'p13-i3', parte: 13, nivel: 3, titulo: 'Independencia · la derecha marca el pulso', compas: 4, sub: 3, bpm: 50, txt: 'gD aI aI gD aI aI gD aI aI gD aI aI', nota: 'Una mano mantiene el pulso sin variar mientras la otra cambia. Si el pulso se mueve, baja el tempo.' },
+  { id: 'p13-i4', parte: 13, nivel: 3, titulo: 'Independencia con semicorcheas', compas: 4, sub: 4, bpm: 50, txt: 'gD aI aI aI gD aI aI aI gD aI aI aI gD aI aI aI' },
+  { id: 'p14-t1', parte: 14, nivel: 2, titulo: 'Tarjeta 1', compas: 4, sub: 1, bpm: 70, txt: 'g^ a a a', nota: 'Lectura a primera vista: lee con metrónomo y no te pares aunque te equivoques.' },
+  { id: 'p14-t2', parte: 14, nivel: 2, titulo: 'Tarjeta 2', compas: 4, bpm: 70, txt: '[a a] g [a a] g' },
+  { id: 'p14-t3', parte: 14, nivel: 2, titulo: 'Tarjeta 3', compas: 4, bpm: 70, txt: '[g a] a - [g a]' },
+  { id: 'p14-t4', parte: 14, nivel: 2, titulo: 'Tarjeta 4', compas: 4, bpm: 70, txt: 'a [a a] g [a a]' },
+  { id: 'p14-t5', parte: 14, nivel: 2, titulo: 'Tarjeta 5', compas: 4, bpm: 70, txt: '[g^ a] [a a] [g a] [a a]' },
+  { id: 'p14-t6', parte: 14, nivel: 2, titulo: 'Tarjeta 6', compas: 4, bpm: 70, txt: 'g - [g a] [a a]' },
+  { id: 'p14-t7', parte: 14, nivel: 2, titulo: 'Tarjeta 7', compas: 4, bpm: 70, txt: '[a a] [g^ a] [a a] [g^ a]' },
+  { id: 'p14-t8', parte: 14, nivel: 2, titulo: 'Tarjeta 8', compas: 4, bpm: 70, txt: '[a -] [g a] [a -] [g a]' },
+  { id: 'p14-t9', parte: 14, nivel: 2, titulo: 'Tarjeta 9', compas: 4, bpm: 60, txt: '[a a a a] g [a a a a] g' },
+  { id: 'p14-t10', parte: 14, nivel: 2, titulo: 'Tarjeta 10', compas: 4, bpm: 60, txt: '[g^ a a] [a a a] [g^ a a] [a a a]' },
+  { id: 'p15-e1', parte: 15, nivel: 1, titulo: 'Pregunta y respuesta 1', compas: 4, sub: 1, bpm: 70, txt: 'g^ a a a - - - -', nota: 'El profesor (la app) toca un compás y el alumno lo repite como un eco en el compás vacío. Después, responde con una variación.' },
+  { id: 'p15-e2', parte: 15, nivel: 2, titulo: 'Pregunta y respuesta 2', compas: 4, bpm: 70, txt: '[g a] [a a] g a - - - -' },
+  { id: 'p15-e3', parte: 15, nivel: 2, titulo: 'Pregunta y respuesta 3', compas: 4, bpm: 60, txt: '[g^ a a] [a a a] [g^ a a] [a a a] - - - -' },
 ];
 const ROLES = { n1: 1, n2: 2, n3: 3, prof: 99 };
 
@@ -297,10 +378,26 @@ let rol = leer('cajon_rol', 'n1');
 let escalera = leer('cajon_escalera', {});
 let cur = null, pasos = [], geo = null, bpm = 70;
 
+/* Cada golpe sabe en qué pulso cae (beat), su sitio dentro del pulso (k) y cuántos golpes lleva ese pulso (n).
+   Con «sub» todos los pulsos se dividen igual; con corchetes cada [grupo] es un pulso: '[gD aI] [aD aI aD] g -'. */
 function parse(ex) {
-  return ex.txt.trim().split(/\s+/).map(t => t === '-' ? { s: null }
-    : { s: t[0], m: (t.match(/[DI]/) || [])[0] || null, ac: t.includes('^') });
+  const golpe = t => t === '-' ? { s: null } : { s: t[0], m: (t.match(/[DI]/) || [])[0] || null, ac: t.includes('^') };
+  let grupos;
+  if (ex.txt.includes('[')) grupos = (ex.txt.match(/\[[^\]]*\]|[^\s\[\]]+/g) || []).map(g => g.replace(/[[\]]/g, '').trim().split(/\s+/));
+  else { const t = ex.txt.trim().split(/\s+/); grupos = []; const sub = ex.sub || 1; for (let i = 0; i < t.length; i += sub) grupos.push(t.slice(i, i + sub)); }
+  const out = [];
+  grupos.forEach((g, beat) => g.forEach((t, k) => {
+    const n = g.length, p = golpe(t);
+    p.beat = beat; p.k = k; p.n = n;
+    p.mano = p.m || ((n === 1 ? beat : n === 3 ? beat * 3 + k : k) % 2 ? 'I' : 'D');
+    out.push(p);
+  }));
+  const tot = out.length;
+  if (ex.din) out.forEach((p, i) => { p.vol = ex.din[0] + (ex.din[1] - ex.din[0]) * (tot > 1 ? i / (tot - 1) : 0); });
+  return out;
 }
+const numPulso = beat => { const k = beat % cur.compas; return cur.cuenta ? cur.cuenta[k] : k + 1; };
+const esBarra = beat => beat % cur.compas === 0 || (cur.barras || []).includes(beat % cur.compas);
 const permitido = ex => ex.nivel <= ROLES[rol];
 
 /* ---------- lista de ejercicios ---------- */
@@ -334,21 +431,22 @@ $('#selRol').addEventListener('change', e => {
 /* ---------- partitura ---------- */
 const PAD = 22, L = 62, ROWH = 112;
 function geometria(ex) {
-  const beatW = { 1: 84, 2: 112, 3: 132, 4: 150 }[ex.sub];
-  const total = pasos.length / ex.sub;
-  let porFila = ex.compas === 12 ? 6 : (ex.sub === 1 ? 8 : 4);
+  const maxN = Math.max(...pasos.map(p => p.n));
+  const beatW = { 1: 84, 2: 112, 3: 132 }[maxN] || 150;
+  const total = pasos[pasos.length - 1].beat + 1;
+  let porFila = ex.compas === 12 ? 6 : ex.compas === 7 ? 7 : ex.compas === 3 ? (maxN === 1 ? 6 : 3) : (maxN === 1 ? 8 : 4);
   porFila = Math.min(porFila, total);
   const filas = Math.ceil(total / porFila);
   return { beatW, porFila, filas, W: PAD * 2 + porFila * beatW, H: filas * ROWH + 6 };
 }
 function pos(i) {
-  const s = cur.sub, beat = Math.floor(i / s), fila = Math.floor(beat / geo.porFila), b = beat % geo.porFila;
-  return { x: PAD + 14 + b * geo.beatW + (i % s) * geo.beatW / s, y: fila * ROWH, fila };
+  const p = pasos[i], fila = Math.floor(p.beat / geo.porFila), b = p.beat % geo.porFila;
+  return { x: PAD + 14 + b * geo.beatW + p.k * geo.beatW / p.n, y: fila * ROWH, fila };
 }
 function glifo(p, x, y) {
   const l = y + L;
   if (!p.s) {
-    return cur.sub === 1
+    return p.n === 1
       ? `<path class="nota" d="M${x - 3} ${l - 16}l6 7-6 6 6 7q-7-2-4 6" fill="none" stroke="currentColor" stroke-width="2"/>`
       : `<g class="nota"><circle cx="${x - 2}" cy="${l - 9}" r="2.6" fill="currentColor"/><path d="M${x + 3} ${l - 10}L${x - 2} ${l + 6}" stroke="currentColor" stroke-width="1.8"/></g>`;
   }
@@ -363,27 +461,29 @@ function glifo(p, x, y) {
 }
 function pintarPartitura() {
   geo = geometria(cur);
-  const s = cur.sub; let o = '';
+  let o = '';
   for (let f = 0; f < geo.filas; f++) {
     const y = f * ROWH, x1 = PAD + geo.porFila * geo.beatW;
     o += `<line class="lin" x1="${PAD}" y1="${y + L}" x2="${x1}" y2="${y + L}"/>`;
     o += `<line class="barra" x1="${x1}" y1="${y + L - 12}" x2="${x1}" y2="${y + L + 12}"/>`;
     for (let b = 0; b < geo.porFila; b++) {
       const beat = f * geo.porFila + b;
-      if (b === 0 || beat % cur.compas === 0) { const bx = PAD + b * geo.beatW; o += `<line class="barra" x1="${bx}" y1="${y + L - 12}" x2="${bx}" y2="${y + L + 12}"/>`; }
+      if (b === 0 || esBarra(beat)) { const bx = PAD + b * geo.beatW; o += `<line class="barra" x1="${bx}" y1="${y + L - 12}" x2="${bx}" y2="${y + L + 12}"/>`; }
     }
   }
   pasos.forEach((p, i) => {
-    const { x, y } = pos(i), beat = Math.floor(i / s), enPulso = i % s === 0;
-    const num = cur.compas === 12 ? (beat % 12) + 1 : (beat % cur.compas) + 1;
+    const { x, y } = pos(i), enPulso = p.k === 0;
+    const num = numPulso(p.beat);
     const cuenta = enPulso ? `<text class="cuenta" x="${x}" y="${y + L + 40}">${num}</text>`
-      : s === 2 ? `<text class="cuenta y" x="${x}" y="${y + L + 40}">y</text>` : '';
+      : p.n === 2 ? `<text class="cuenta y" x="${x}" y="${y + L + 40}">y</text>` : '';
     const mano = p.m ? `<text class="mano ${p.m}" x="${x}" y="${y + L + 24}">${p.m}</text>` : '';
     const ac = p.ac ? `<path class="ac" d="M${x} ${y + 8}l5 6m-5-6l-5 6" transform="translate(5.5 0)"/>` : '';
     o += `<g class="st" data-i="${i}"><rect class="hl" x="${x - 15}" y="${y + 2}" width="${30 + 6}" height="${ROWH - 16}" rx="6"/>${ac}${glifo(p, x, y)}${mano}${cuenta}</g>`;
   });
-  if (s > 1) for (let b = 0; b < pasos.length / s; b++) {   /* barras de corcheas, tresillos y semicorcheas */
-    const idx = []; for (let k = 0; k < s; k++) if (pasos[b * s + k].s) idx.push(b * s + k);
+  const porPulso = {};   /* barras de corcheas, tresillos y semicorcheas */
+  pasos.forEach((p, i) => { if (p.n > 1) (porPulso[p.beat] = porPulso[p.beat] || []).push(i); });
+  for (const b in porPulso) {
+    const s = pasos[porPulso[b][0]].n, idx = porPulso[b].filter(i => pasos[i].s);
     if (idx.length < 2) continue;
     const a = pos(idx[0]), z = pos(idx[idx.length - 1]), y = a.y + 20;
     o += `<rect x="${a.x + 4.7}" y="${y}" width="${z.x - a.x + 1.6}" height="4" fill="var(--ink)"/>`;
@@ -481,7 +581,7 @@ const click = (t, fuerte) => tono(t, fuerte ? 1760 : 1180, fuerte ? 1700 : 1150,
 
 /* ---------- reproductor: se programa el audio por delante y la animación lo sigue ---------- */
 const R = { on: false, sig: 0, i: 0, vuelta: 0, entrada: 0, entradaTot: 0, timer: 0, cola: [], ult: null, lock: null };
-const fuerte = inBar => cur.compas === 12 ? SOLEA.includes(inBar + 1) : inBar === 0;
+const fuerte = inBar => cur.fuertes ? cur.fuertes.includes(inBar + 1) : cur.compas === 12 ? SOLEA.includes(inBar + 1) : inBar === 0;
 function programar() {
   while (R.sig < ctx.currentTime + 0.12) {
     const pulso = 60 / bpm;
@@ -490,11 +590,11 @@ function programar() {
       click(R.sig, n === 1);
       R.cola.push({ t: R.sig, entrada: n }); R.sig += pulso; R.entrada--; continue;
     }
-    const p = pasos[R.i], t = R.sig, beat = Math.floor(R.i / cur.sub);
-    if (R.i % cur.sub === 0 && $('#chkMet').checked && !($('#chkHuecos').checked && R.vuelta % 2 === 1)) click(t, fuerte(beat % cur.compas));
-    if (p.s && $('#chkCaj').checked) SON[p.s](t, p.ac ? 1 : 0.6);
-    R.cola.push({ t, i: R.i, dur: pulso / cur.sub, vuelta: R.vuelta });
-    R.sig += pulso / cur.sub;
+    const p = pasos[R.i], t = R.sig, beat = p.beat;
+    if (p.k === 0 && $('#chkMet').checked && !($('#chkHuecos').checked && R.vuelta % 2 === 1)) click(t, fuerte(beat % cur.compas));
+    if (p.s && $('#chkCaj').checked) SON[p.s](t, p.vol != null ? Math.min(1, p.vol * (p.ac ? 1.3 : 1)) : p.ac ? 1 : 0.6);
+    R.cola.push({ t, i: R.i, dur: pulso / p.n, vuelta: R.vuelta });
+    R.sig += pulso / p.n;
     if (++R.i >= pasos.length) { R.i = 0; R.vuelta++; finVuelta(); }
   }
 }
@@ -539,7 +639,7 @@ function cuadro() {
   if (R.ult) {   /* el cursor avanza suave hasta el golpe siguiente */
     const a = pos(R.ult.i), sigI = (R.ult.i + 1) % pasos.length, b = pos(sigI);
     const fr = Math.min(1, Math.max(0, (ahora - R.ult.t) / R.ult.dur));
-    const x = b.fila === a.fila && sigI > R.ult.i ? a.x + (b.x - a.x) * fr : a.x + (geo.beatW / cur.sub) * fr;
+    const x = b.fila === a.fila && sigI > R.ult.i ? a.x + (b.x - a.x) * fr : a.x + (geo.beatW / pasos[R.ult.i].n) * fr;
     const c = $('#cursor');
     c.setAttribute('x1', x); c.setAttribute('x2', x); c.setAttribute('y1', a.y + 6); c.setAttribute('y2', a.y + ROWH - 18);
   }
@@ -549,14 +649,13 @@ function golpe(e) {
   R.ult = e;
   document.querySelectorAll('.st.on').forEach(el => el.classList.remove('on'));
   const g = document.querySelector(`.st[data-i="${e.i}"]`); if (g) g.classList.add('on');
-  const p = pasos[e.i], s = cur.sub;
-  if (e.i % s === 0) {
-    const beat = Math.floor(e.i / s), n = cur.compas === 12 ? (beat % 12) + 1 : (beat % cur.compas) + 1;
+  const p = pasos[e.i];
+  if (p.k === 0) {
+    const beat = p.beat, n = numPulso(beat);
     $('#cNum').textContent = n; $('#cNum').className = 'n' + (fuerte(beat % cur.compas) ? ' fuerte' : '');
     $('#cInfo').textContent = `Vuelta ${e.vuelta + 1}` + ($('#chkHuecos').checked && e.vuelta % 2 ? ' · sin metrónomo' : '');
   }
-  const mano = p.m || (e.i % 2 ? 'I' : 'D');
-  mover(mano, p);
+  mover(p.mano, p);
 }
 
 /* ---------- tapa del cajón: manos y ondas ---------- */
