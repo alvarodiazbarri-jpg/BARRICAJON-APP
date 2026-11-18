@@ -1,8 +1,8 @@
 """Genera la app a partir de src/app.html (el contenido) y assets/ (logo e iconos).
 
 - index.html          → una sola página con todo dentro (la que se publica como enlace de prueba).
-- web/                → la app instalable (PWA): página, manifiesto, service worker e iconos.
-                        Es la carpeta que publica Netlify (ver netlify.toml).
+- docs/               → la app instalable (PWA): página, manifiesto, service worker e iconos.
+                        Es la carpeta que publica GitHub Pages (o Netlify, ver netlify.toml).
 """
 import base64
 import json
@@ -32,7 +32,7 @@ for marca, nombre, tipo in [("{{logo}}", "logo.jpg", "image/jpeg"), ("{{icono180
 (raiz / "index.html").write_text(pagina(cuerpo.replace("{{pwa_head}}", "")), encoding="utf-8")
 
 # 2) app instalable
-web = raiz / "web"
+web = raiz / "docs"
 web.mkdir(exist_ok=True)
 pwa = ('<link rel="manifest" href="manifest.webmanifest">\n'
        '<meta name="mobile-web-app-capable" content="yes">\n'
@@ -71,4 +71,4 @@ self.addEventListener('fetch', e => {
   }).catch(() => caches.match(e.request)));
 });
 """, encoding="utf-8")
-print("index.html y web/ generados")
+print("index.html y docs/ generados")

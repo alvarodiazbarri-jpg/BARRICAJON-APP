@@ -1,6 +1,6 @@
-# Netlify publica la carpeta web/ (la genera build.py y se sube ya hecha al repositorio).
+# Netlify publica la carpeta docs/ (la genera build.py y se sube ya hecha al repositorio).
 [build]
-  publish = "web"
+  publish = "docs"
   command = ""
 
 [[headers]]
