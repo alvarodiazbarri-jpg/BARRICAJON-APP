@@ -179,16 +179,32 @@ details.bt .vol { margin-top: 8px; }
         <div class="tapa-tit">Tapa del cajón · vista del que toca · tócala para oírla</div>
         <svg id="tapa" viewBox="0 0 300 300" aria-label="Animación de la tapa del cajón">
           <defs>
-            <pattern id="vetas" width="200" height="14" patternUnits="userSpaceOnUse">
-              <path d="M0 7 Q50 3 100 7 T200 7" fill="none" stroke="var(--wood-dk)" stroke-opacity=".25"/>
-            </pattern>
+            <linearGradient id="brillo" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2b2b2b"/><stop offset=".55" stop-color="#151515"/><stop offset="1" stop-color="#0c0c0c"/>
+            </linearGradient>
           </defs>
-          <rect x="30" y="20" width="200" height="262" rx="10" fill="var(--wood)" stroke="var(--wood-dk)" stroke-width="3"/>
-          <rect x="30" y="20" width="200" height="262" rx="10" fill="url(#vetas)"/>
-          <rect x="36" y="26" width="188" height="48" rx="6" fill="none" stroke="var(--wood-dk)" stroke-dasharray="4 4" stroke-opacity=".7"/>
-          <text x="130" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="var(--wood-dk)">AGUDO · borde</text>
-          <circle cx="130" cy="168" r="52" fill="none" stroke="var(--wood-dk)" stroke-dasharray="4 4" stroke-opacity=".7"/>
-          <text x="130" y="172" text-anchor="middle" font-size="11" font-weight="700" fill="var(--wood-dk)">GRAVE · centro</text>
+          <!-- canto de contrachapado y tapa negra (Larosa PRO) -->
+          <path d="M30 34 Q30 18 48 16 Q130 8 212 16 Q230 18 230 34 V276 Q230 286 220 286 H40 Q30 286 30 276 Z" fill="#e6d3ae" stroke="#b99a66" stroke-width="1.2"/>
+          <path d="M34 36 Q34 22 50 20 Q130 12 210 20 Q226 22 226 36 V274 Q226 282 218 282 H42 Q34 282 34 274 Z" fill="url(#brillo)"/>
+          <g fill="none" stroke="#c9a14a" stroke-width="1.6" stroke-linecap="round">
+            <path d="M50 92 V46 H104"/><path d="M156 46 H210 V92"/>
+            <path d="M50 226 V262 H100"/><path d="M160 262 H210 V226"/>
+          </g>
+          <text x="130" y="50" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#c9a14a" letter-spacing="1">PRO</text>
+          <g fill="none" stroke="#c9a14a" stroke-width="1"><path d="M130 254 C108 244 108 224 130 202"/><path d="M130 254 C152 244 152 224 130 202"/><path d="M130 254 C104 244 104 224 135.6 204.4"/><path d="M130 254 C156 244 156 224 124.4 204.4"/><path d="M130 254 C100 244 100 224 141.2 206.8"/><path d="M130 254 C160 244 160 224 118.8 206.8"/><path d="M130 254 C96 244 96 224 146.8 209.2"/><path d="M130 254 C164 244 164 224 113.2 209.2"/></g>
+          <text x="130" y="266" text-anchor="middle" font-size="9" fill="#c9a14a" letter-spacing="2">LAROSA</text>
+          <g fill="#9a9a9a" stroke="#4a4a4a" stroke-width="1"><circle cx="52" cy="30" r="2.6"/><circle cx="91" cy="27" r="2.6"/><circle cx="130" cy="26" r="2.6"/><circle cx="169" cy="27" r="2.6"/><circle cx="208" cy="30" r="2.6"/><circle cx="40" cy="70" r="2.6"/><circle cx="40" cy="125" r="2.6"/><circle cx="40" cy="180" r="2.6"/><circle cx="40" cy="232" r="2.6"/><circle cx="220" cy="70" r="2.6"/><circle cx="220" cy="125" r="2.6"/><circle cx="220" cy="180" r="2.6"/><circle cx="220" cy="232" r="2.6"/><circle cx="52" cy="272" r="2.6"/><circle cx="91" cy="275" r="2.6"/><circle cx="130" cy="276" r="2.6"/><circle cx="169" cy="275" r="2.6"/><circle cx="208" cy="272" r="2.6"/></g>
+          <!-- pegatina de Instagram -->
+          <g transform="translate(58 204)">
+            <rect x="0" y="-10" width="13" height="13" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/>
+            <circle cx="6.5" cy="-3.5" r="3" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="10.2" cy="-7.3" r=".9" fill="#fff"/>
+            <text x="17" y="1.5" font-size="12.5" font-weight="800" fill="#fff">@barricajondm</text>
+          </g>
+          <!-- zonas de golpe -->
+          <rect x="44" y="56" width="172" height="34" rx="6" fill="none" stroke="#fff" stroke-opacity=".28" stroke-dasharray="4 4"/>
+          <text x="130" y="104" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" fill-opacity=".55">AGUDO · borde</text>
+          <circle cx="130" cy="160" r="44" fill="none" stroke="#fff" stroke-opacity=".28" stroke-dasharray="4 4"/>
+          <text x="130" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" fill-opacity=".55">GRAVE · centro</text>
           <g>
             <ellipse cx="268" cy="70" rx="24" ry="7" fill="var(--gold)" stroke="var(--wood-dk)"/>
             <line x1="268" y1="77" x2="268" y2="110" stroke="var(--muted)" stroke-width="2"/>
@@ -653,8 +669,8 @@ function golpe(e) {
 
 /* ---------- tapa del cajón: manos y ondas ---------- */
 const SITIO = {
-  a: { D: [175, 50], I: [85, 50] }, f: { D: [175, 50], I: [85, 50] },
-  g: { D: [152, 168], I: [108, 168] },
+  a: { D: [175, 73], I: [85, 73] }, f: { D: [175, 73], I: [85, 73] },
+  g: { D: [150, 160], I: [110, 160] },
   p: { D: [262, 70], I: [262, 70] }, c: { D: [268, 182], I: [268, 182] },
   reposo: { D: [178, 245], I: [82, 245] },
 };
@@ -673,7 +689,7 @@ function mover(m, p) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const onda = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   onda.setAttribute('cx', xy[0]); onda.setAttribute('cy', xy[1]); onda.setAttribute('r', 10);
-  onda.setAttribute('fill', 'none'); onda.setAttribute('stroke', p.ac ? 'var(--red)' : 'var(--ink)');
+  onda.setAttribute('fill', 'none'); onda.setAttribute('stroke', p.ac ? '#ff6a5c' : p.s === 'p' || p.s === 'c' ? 'var(--ink)' : '#f1d99a');
   onda.setAttribute('stroke-width', p.ac ? 4 : 2);
   $('#ondas').appendChild(onda);
   const fin = p.s === 'f' ? 22 : p.ac ? 60 : p.s === 'g' ? 48 : 36;
