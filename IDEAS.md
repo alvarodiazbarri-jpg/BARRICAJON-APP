@@ -1,9 +1,9 @@
 # Ideas y tareas pendientes
 
 ## Lo que falta ahora mismo
-- **Los demás ejercicios del cuaderno.** En la app solo están transcritos 24 (partes 1, 2, 6 y 11).
-  Hace falta el cuaderno (PDF o fotos de cada página) para pasar el resto: rumbas, tangos, bulerías,
-  sevillanas, chirigota, rellenos, lectura a primera vista…
+- ~~Los demás ejercicios del cuaderno~~ ✅ hecho: 99 ejercicios de las 15 partes.
+- ~~Tapa con el cajón Larosa PRO y la pegatina @barricajondm~~ ✅ hecho (en 2D). Siguiente: versión 3D.
+- ~~Logo El Barri como pantalla de entrada e icono~~ ✅ hecho.
 - **Sonidos de tu cajón.** Grabar cada golpe (grave, agudo, fantasma, platillo, caja), suave y con acento.
 
 ## Ideas para la app

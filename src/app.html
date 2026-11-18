@@ -1,4 +1,8 @@
 <title>Cajón Flamenco Barri</title>
+<link rel="icon" type="image/png" href="{{icono64}}">
+<link rel="apple-touch-icon" href="{{icono180}}">
+<meta name="apple-mobile-web-app-title" content="El Barri">
+<meta name="theme-color" content="#000000">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Lato:ital,wght@0,400;0,700;1,400&display=swap">
@@ -137,10 +141,25 @@ details.bt .vol { margin-top: 8px; }
 .proto { margin-top: 26px; font-size: 12.5px; color: var(--muted); max-width: 75ch; }
 
 @media (prefers-reduced-motion: reduce) { .mano-g, .nota, .st .hl { transition: none; } }
+/* ---------- pantalla de entrada ---------- */
+.entrada-app { position: fixed; inset: 0; z-index: 50; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; padding: 24px 16px; cursor: pointer; transition: opacity .5s ease; }
+.entrada-app img { width: min(86vw, 62vh, 520px); height: auto; border-radius: 12px; animation: latido 1.6s ease-in-out infinite alternate; }
+.entrada-app .toca { color: #f1d99a; font: 600 14px/1.3 var(--f-tit); letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+.entrada-app.fuera { opacity: 0; pointer-events: none; }
+@keyframes latido { from { transform: scale(.97); } to { transform: scale(1.02); } }
+@media (prefers-reduced-motion: reduce) { .entrada-app img { animation: none; } }
+.marca-logo { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex: none; }
 </style>
 
+<div class="entrada-app" id="entradaApp" role="button" tabindex="0" aria-label="Entrar en la app">
+  <img src="{{logo}}" alt="El Barri · Cajón flamenco · @barricajondm">
+  <div class="toca">Toca para entrar</div>
+</div>
+
 <header class="cab"><div class="cab-in">
-  <div class="marca">Cajón flamenco<small>Cuaderno de ejercicios · BARRI</small></div>
+  <div style="display:flex;align-items:center;gap:10px"><img class="marca-logo" src="{{icono180}}" alt="">
+  <div class="marca">Cajón flamenco<small>Cuaderno de ejercicios · BARRI</small></div></div>
   <label class="rol" for="selRol">Entrar como
     <select id="selRol">
       <option value="n1">Alumno · nivel 1</option>
@@ -727,6 +746,15 @@ function marcar(t) {
 $('#peldanos').addEventListener('click', e => { const b = e.target.closest('.peldano'); if (b) { setBpm(+b.dataset.t); marcar(+b.dataset.t); } });
 $('#btnLimpio').addEventListener('click', () => { escalera[cur.id] = Math.max(escalera[cur.id] || 0, bpm); guardar('cajon_escalera', escalera); pintarEscalera(); pintarLista(); });
 $('#retraso').addEventListener('input', e => { $('#retrasoOut').textContent = e.target.value; });
+
+/* ---------- pantalla de entrada: al tocarla se entra y se prepara el sonido ---------- */
+function entrar() {
+  const e = $('#entradaApp'); if (!e || e.classList.contains('fuera')) return;
+  e.classList.add('fuera'); setTimeout(() => e.remove(), 600);
+  try { audio(); ctx.resume(); } catch (x) { /* sin sonido */ }
+}
+$('#entradaApp').addEventListener('click', entrar);
+$('#entradaApp').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); entrar(); } });
 
 /* ---------- arranque ---------- */
 const ultimo = EJ.find(e => e.id === leer('cajon_ultimo', '') && permitido(e));

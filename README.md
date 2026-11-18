@@ -5,9 +5,12 @@ App para practicar el cajón con los ejercicios del cuaderno: partitura, sonido,
 ## Prototipo (fase 1)
 
 - Se edita `src/app.html`; `python3 build.py` genera `index.html` (se abre tal cual en el navegador).
+  El logo y los iconos están en `assets/` y `build.py` los mete dentro de la página.
 - Ejercicios como datos (`EJ` en el script): cada golpe es la letra del sonido (`g` grave, `a` agudo, `p` platillo,
   `c` caja, `f` fantasma), la mano (`D`/`I`) y `^` si lleva acento; `-` es silencio. `compas` = pulsos por compás,
   `sub` = golpes por pulso (1 negra, 2 corchea, 3 tresillo, 4 semicorchea).
+  Para mezclar figuras, cada pulso entre corchetes: `'[gD aI] [aD aI aD] g -'`. Opcionales: `cuenta` (números que se
+  cantan, p. ej. bulerías), `fuertes` (pulsos que marca fuerte el metrónomo), `barras`, `din` (volumen inicial y final).
 - Metrónomo con el audio del navegador (se programa por delante, preciso), acentos de la soleá en el compás de 12,
   cuenta de entrada, huecos de silencio y subida automática de tempo.
 - Escalera de tempo guardada en el navegador.
