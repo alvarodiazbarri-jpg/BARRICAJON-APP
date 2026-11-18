@@ -176,7 +176,7 @@ details.bt .vol { margin-top: 8px; }
 
     <section class="practica">
       <div class="tapa-caja">
-        <div class="tapa-tit">Tapa del cajón · vista del que toca</div>
+        <div class="tapa-tit">Tapa del cajón · vista del que toca · tócala para oírla</div>
         <svg id="tapa" viewBox="0 0 300 300" aria-label="Animación de la tapa del cajón">
           <defs>
             <pattern id="vetas" width="200" height="14" patternUnits="userSpaceOnUse">
@@ -416,13 +416,24 @@ $('#bpmMenos').addEventListener('click', () => setBpm(bpm - 5));
 $('#bpmMas').addEventListener('click', () => setBpm(bpm + 5));
 
 /* ---------- sonido (sintetizado) ---------- */
-let ctx, busMet, busCaj, ruido;
+let ctx, busMet, busCaj, ruido, satur;
 function audio() {
   if (ctx) return;
+  /* en iPhone, que suene aunque el interruptor de silencio esté puesto */
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
   ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const master = ctx.createGain(); master.connect(ctx.destination);
+  const master = ctx.createGain();
+  /* compresor: evita que los golpes fuertes distorsionen y sube el volumen percibido en el móvil */
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -14; comp.knee.value = 8; comp.ratio.value = 4; comp.attack.value = 0.002; comp.release.value = 0.15;
+  master.connect(comp).connect(ctx.destination);
+  /* saturación suave para el grave: crea armónicos que sí se oyen en el altavoz del móvil */
+  satur = ctx.createWaveShaper();
+  const curva = new Float32Array(1024);
+  for (let i = 0; i < curva.length; i++) { const x = i / 511.5 - 1; curva[i] = Math.tanh(3 * x) / Math.tanh(3); }
+  satur.curve = curva; satur.oversample = '2x';
   busMet = ctx.createGain(); busCaj = ctx.createGain();
-  busMet.connect(master); busCaj.connect(master); volumenes();
+  busMet.connect(master); busCaj.connect(master); satur.connect(busCaj); volumenes();
   ruido = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const d = ruido.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
 }
@@ -446,7 +457,14 @@ function tono(t, f0, f1, tipo, pico, dec, bus) {
   o.connect(g).connect(bus); o.start(t); o.stop(t + dec + 0.05);
 }
 const SON = {
-  g: (t, v) => { tono(t, 125, 52, 'sine', 0.95 * v, 0.4, busCaj); ruidoF(t, 'lowpass', 500, 0.7, 0.3 * v, 0.05); },
+  g: (t, v) => {   /* bombo del cajón: cuerpo grave + armónicos (saturados) + golpe de la palma */
+    v *= 0.6;
+    tono(t, 140, 70, 'sine', 0.5 * v, 0.35, busCaj);
+    tono(t, 150, 80, 'sine', 0.45 * v, 0.28, satur);
+    tono(t, 300, 160, 'triangle', 0.22 * v, 0.12, busCaj);
+    ruidoF(t, 'bandpass', 260, 1.2, 0.6 * v, 0.09);
+    ruidoF(t, 'lowpass', 900, 0.7, 0.2 * v, 0.03);
+  },
   a: (t, v) => { ruidoF(t, 'bandpass', 2300, 0.9, 0.75 * v, 0.09); ruidoF(t, 'highpass', 5000, 0.5, 0.28 * v, 0.2); tono(t, 340, 260, 'triangle', 0.25 * v, 0.05, busCaj); },
   f: (t) => SON.a(t, 0.16),
   p: (t, v) => { ruidoF(t, 'highpass', 6500, 0.3, 0.4 * v, 0.9); ruidoF(t, 'bandpass', 9500, 2, 0.22 * v, 0.5); },
@@ -563,6 +581,20 @@ function mover(m, p) {
   onda.animate([{ r: 10, opacity: p.s === 'f' ? 0.35 : 0.8 }, { r: fin, opacity: 0 }], { duration: p.s === 'g' ? 520 : 360, easing: 'ease-out' })
     .onfinish = () => onda.remove();
 }
+
+/* tocar la tapa con el dedo para oír cada sonido */
+$('#tapa').addEventListener('pointerdown', e => {
+  const pt = $('#tapa').createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const { x, y } = pt.matrixTransform($('#tapa').getScreenCTM().inverse());
+  let s = null;
+  if (x > 240 && y < 140) s = 'p';
+  else if (x > 240 && y < 230) s = 'c';
+  else if (x >= 30 && x <= 230 && y >= 20 && y <= 282) s = y < 110 ? 'a' : 'g';
+  if (!s) return;
+  audio(); ctx.resume();
+  SON[s](ctx.currentTime + 0.01, 1);
+  if (!R.on) mover(x < 130 ? 'I' : 'D', { s, ac: false });
+});
 
 /* ---------- escalera de tempo ---------- */
 const TEMPOS = [60, 70, 80, 90, 100, 110, 120];
