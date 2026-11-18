@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Cajón Flamenco Barri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Lato:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Prototipo de la app del cajón: la identidad del cuaderno (cabecera negra con raya dorada, etiquetas rojas, recuadros crema).
+   Columna de ejercicios a la izquierda; a la derecha la partitura, la tapa del cajón animada y el metrónomo. */
+:root {
+  --bg: #fbfaf7; --surface: #ffffff; --ink: #231f20; --muted: #6f675d; --line: #ddd6ca;
+  --red: #a8302a; --gold: #d49b14; --cream: #f4ead9; --wood: #c99257; --wood-dk: #8a5a2e;
+  --mano-d: #a8302a; --mano-i: #1f5f8b; --hl: rgba(212,155,20,.18);
+  --f-tit: "Poppins", "Segoe UI", system-ui, sans-serif;
+  --f-txt: "Lato", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #16130f; --surface: #211d18; --ink: #f2ece2; --muted: #a99f90; --line: #3b342a;
+  --red: #e2645c; --gold: #eab43c; --cream: #2c261e; --wood: #a8733f; --wood-dk: #6b4422;
+  --mano-d: #e2645c; --mano-i: #5aa7dc; --hl: rgba(234,180,60,.16); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #16130f; --surface: #211d18; --ink: #f2ece2; --muted: #a99f90; --line: #3b342a;
+  --red: #e2645c; --gold: #eab43c; --cream: #2c261e; --wood: #a8733f; --wood-dk: #6b4422;
+  --mano-d: #e2645c; --mano-i: #5aa7dc; --hl: rgba(234,180,60,.16); color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-txt); }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ---------- cabecera ---------- */
+.cab { background: #231f20; color: #f4ead9; border-bottom: 4px solid #d49b14; }
+.cab-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px;
+  max-width: 1200px; margin: 0 auto; padding-block: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.marca { font: 700 17px/1.1 var(--f-tit); letter-spacing: .02em; text-transform: uppercase; }
+.marca small { display: block; font: 400 12px/1.4 var(--f-txt); letter-spacing: .12em; color: #d49b14; }
+.rol { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.rol select { background: #3a3433; color: #f4ead9; border: 1px solid #5a514c; border-radius: 6px; padding: 5px 8px; }
+
+/* ---------- distribución ---------- */
+.pag { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 24px;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- lista de ejercicios ---------- */
+.lista { display: flex; flex-direction: column; gap: 18px; align-self: start; position: sticky; top: 12px;
+  max-height: calc(100vh - 24px); overflow-y: auto; padding-right: 4px; }
+.niv h3 { margin: 0 0 6px; font: 600 11px/1.3 var(--f-tit); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.parte { margin: 8px 0 4px; font: 700 12.5px/1.3 var(--f-tit); color: var(--red); }
+.ej { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; text-align: left;
+  background: none; border: 0; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 14px; }
+.ej:hover { background: var(--cream); }
+.ej[aria-current="true"] { background: var(--ink); color: var(--bg); }
+.ej:disabled { cursor: not-allowed; color: var(--muted); opacity: .6; }
+.ej .bpm { font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--gold); white-space: nowrap; }
+.sel-movil { display: none; }
+.sel-movil select { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.aviso-rol { font-size: 12.5px; color: var(--muted); background: var(--cream); border-radius: 8px; padding: 10px 12px; }
+@media (max-width: 860px) { .pag { grid-template-columns: minmax(0, 1fr); } .lista { display: none; } .sel-movil { display: block; } }
+
+/* ---------- ejercicio ---------- */
+.ej-cab { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font: 700 12px/1.3 var(--f-tit); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+h1 { margin: 0; font: 700 clamp(24px, 4vw, 34px)/1.15 var(--f-tit); text-wrap: balance; }
+h1::after { content: ""; display: block; width: 64px; height: 3px; background: var(--red); margin-top: 10px; }
+.consejo { margin: 14px 0 0; padding: 10px 14px; background: var(--cream); border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0; max-width: 70ch; }
+.consejo b { display: block; font: 700 11px/1.4 var(--f-tit); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+
+.partitura { margin-top: 18px; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px 4px; }
+.partitura svg { display: block; width: 100%; margin: 0 auto; }
+.st .hl { fill: var(--hl); opacity: 0; transition: opacity .15s; }
+.st.on .hl { opacity: 1; fill: var(--hl); }
+.st { color: var(--ink); }
+.st.on { color: var(--red); }
+.st.on .nota { transform: scale(1.25); }
+.nota { transform-box: fill-box; transform-origin: center; transition: transform .08s; }
+.ac { fill: none; stroke: var(--red); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.lin { stroke: var(--line); stroke-width: 1.4; }
+.barra { stroke: var(--ink); stroke-width: 2; }
+.mano { font: 700 12px var(--f-txt); text-anchor: middle; }
+.mano.D { fill: var(--mano-d); } .mano.I { fill: var(--mano-i); }
+.cuenta { font: 700 11px var(--f-txt); text-anchor: middle; fill: var(--ink); }
+.cuenta.y { font-weight: 400; font-style: italic; fill: var(--muted); }
+.tres { font: italic 700 11px var(--f-txt); text-anchor: middle; fill: var(--muted); }
+.cursor { stroke: var(--gold); stroke-width: 2; opacity: 0; }
+.tocando .cursor { opacity: .9; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--muted); padding: 8px 6px 6px; }
+.leyenda span { display: inline-flex; align-items: center; gap: 5px; }
+.leyenda svg { width: 14px; height: 14px; min-width: 0; margin: 0; }
+
+/* ---------- zona de práctica ---------- */
+.practica { margin-top: 20px; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 640px) { .practica { grid-template-columns: minmax(0, 1fr); } }
+.tapa-caja { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.tapa-caja svg { width: 100%; max-width: 300px; display: block; margin: 0 auto; }
+.tapa-tit { font: 600 11px/1.3 var(--f-tit); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 4px; }
+.mano-g { transition: transform .07s ease-out; }
+.mano-g.reposo { opacity: .55; }
+.contador { display: flex; align-items: baseline; justify-content: center; gap: 10px; font-variant-numeric: tabular-nums; }
+.contador .n { font: 700 54px/1 var(--f-tit); min-width: 1.4em; text-align: center; }
+.contador .n.fuerte { color: var(--red); }
+.contador .n.entrada { color: var(--gold); }
+.contador .info { font-size: 13px; color: var(--muted); }
+
+.mandos { display: flex; flex-direction: column; gap: 14px; }
+.fila { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.btn-play { display: inline-flex; align-items: center; gap: 10px; background: var(--red); color: #fff; border: 0; border-radius: 999px;
+  padding: 12px 26px; font: 700 16px var(--f-tit); letter-spacing: .04em; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,.25); }
+.btn-play:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+.btn-play.parar { background: var(--ink); color: var(--bg); }
+.tempo { display: flex; align-items: center; gap: 8px; }
+.tempo button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 20px; cursor: pointer; }
+.tempo output { font: 700 28px/1 var(--f-tit); font-variant-numeric: tabular-nums; min-width: 2.6ch; text-align: center; }
+.tempo small { color: var(--muted); }
+#bpmRange { width: 100%; accent-color: var(--red); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px;
+  background: var(--surface); font-size: 13.5px; cursor: pointer; user-select: none; }
+.chip:has(input:checked) { border-color: var(--gold); background: var(--cream); }
+.chip input { accent-color: var(--red); margin: 0; }
+.chip input[type="number"] { width: 4.2em; padding: 1px 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+.vol { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: center; font-size: 13px; color: var(--muted); }
+.vol input { accent-color: var(--gold); width: 100%; }
+details.bt { font-size: 13px; color: var(--muted); }
+details.bt summary { cursor: pointer; }
+details.bt .vol { margin-top: 8px; }
+
+/* ---------- escalera de tempo ---------- */
+.escalera { margin-top: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.escalera h2 { margin: 0 0 4px; font: 700 13px/1.3 var(--f-tit); letter-spacing: .08em; text-transform: uppercase; color: var(--red); }
+.escalera p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+.peldanos { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; }
+.peldano { border: 1px solid var(--line); border-radius: 6px 6px 2px 2px; background: var(--bg); cursor: pointer;
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.peldano.hecho { background: var(--gold); border-color: var(--gold); color: #231f20; font-weight: 700; }
+.escalera .fila { margin-top: 12px; }
+.btn-sec { border: 1px solid var(--ink); background: none; border-radius: 999px; padding: 7px 16px; cursor: pointer; font-weight: 700; font-size: 13.5px; }
+.btn-sec:hover { background: var(--cream); }
+.proto { margin-top: 26px; font-size: 12.5px; color: var(--muted); max-width: 75ch; }
+
+@media (prefers-reduced-motion: reduce) { .mano-g, .nota, .st .hl { transition: none; } }
+</style>
+
+<header class="cab"><div class="cab-in">
+  <div class="marca">Cajón flamenco<small>Cuaderno de ejercicios · BARRI</small></div>
+  <label class="rol" for="selRol">Entrar como
+    <select id="selRol">
+      <option value="n1">Alumno · nivel 1</option>
+      <option value="n2">Alumno · nivel 2</option>
+      <option value="n3">Alumno · nivel 3</option>
+      <option value="prof">Profesor</option>
+    </select>
+  </label>
+</div></header>
+
+<div class="pag">
+  <nav class="lista" id="lista" aria-label="Ejercicios"></nav>
+
+  <main>
+    <div class="sel-movil"><select id="selMovil" aria-label="Elegir ejercicio"></select></div>
+    <div class="ej-cab" style="margin-top:4px">
+      <span class="eyebrow" id="ejParte"></span>
+      <h1 id="ejTitulo"></h1>
+    </div>
+    <p class="consejo" id="ejNota"></p>
+
+    <div class="partitura">
+      <svg id="partitura" aria-label="Partitura del ejercicio"></svg>
+      <div class="leyenda">
+        <span><svg viewBox="-8 -8 16 16"><ellipse rx="6" ry="4.4" transform="rotate(-20)" fill="currentColor"/></svg>grave</span>
+        <span><svg viewBox="-8 -8 16 16"><path d="M-5-5L5 5M5-5L-5 5" stroke="currentColor" stroke-width="2"/></svg>agudo</span>
+        <span><svg viewBox="-8 -8 16 16"><path d="M0-6L6 0L0 6L-6 0Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>platillo</span>
+        <span><svg viewBox="-8 -8 16 16"><path class="ac" d="M-5 3L0-3L5 3"/></svg>acento</span>
+        <span><b style="color:var(--mano-d)">D</b> mano derecha</span>
+        <span><b style="color:var(--mano-i)">I</b> mano izquierda</span>
+      </div>
+    </div>
+
+    <section class="practica">
+      <div class="tapa-caja">
+        <div class="tapa-tit">Tapa del cajón · vista del que toca</div>
+        <svg id="tapa" viewBox="0 0 300 300" aria-label="Animación de la tapa del cajón">
+          <defs>
+            <pattern id="vetas" width="200" height="14" patternUnits="userSpaceOnUse">
+              <path d="M0 7 Q50 3 100 7 T200 7" fill="none" stroke="var(--wood-dk)" stroke-opacity=".25"/>
+            </pattern>
+          </defs>
+          <rect x="30" y="20" width="200" height="262" rx="10" fill="var(--wood)" stroke="var(--wood-dk)" stroke-width="3"/>
+          <rect x="30" y="20" width="200" height="262" rx="10" fill="url(#vetas)"/>
+          <rect x="36" y="26" width="188" height="48" rx="6" fill="none" stroke="var(--wood-dk)" stroke-dasharray="4 4" stroke-opacity=".7"/>
+          <text x="130" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="var(--wood-dk)">AGUDO · borde</text>
+          <circle cx="130" cy="168" r="52" fill="none" stroke="var(--wood-dk)" stroke-dasharray="4 4" stroke-opacity=".7"/>
+          <text x="130" y="172" text-anchor="middle" font-size="11" font-weight="700" fill="var(--wood-dk)">GRAVE · centro</text>
+          <g>
+            <ellipse cx="268" cy="70" rx="24" ry="7" fill="var(--gold)" stroke="var(--wood-dk)"/>
+            <line x1="268" y1="77" x2="268" y2="110" stroke="var(--muted)" stroke-width="2"/>
+            <text x="268" y="124" text-anchor="middle" font-size="10" fill="var(--muted)">platillo</text>
+            <circle cx="268" cy="182" r="18" fill="var(--surface)" stroke="var(--muted)" stroke-width="2"/>
+            <text x="268" y="214" text-anchor="middle" font-size="10" fill="var(--muted)">caja</text>
+          </g>
+          <g id="ondas"></g>
+          <g id="manoI" class="mano-g reposo"><circle r="17" fill="var(--mano-i)" stroke="var(--surface)" stroke-width="3"/><text y="5" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">I</text></g>
+          <g id="manoD" class="mano-g reposo"><circle r="17" fill="var(--mano-d)" stroke="var(--surface)" stroke-width="3"/><text y="5" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">D</text></g>
+        </svg>
+        <div class="contador"><span class="n" id="cNum">·</span><span class="info" id="cInfo">Pulsa Tocar</span></div>
+      </div>
+
+      <div class="mandos">
+        <div class="fila">
+          <button class="btn-play" id="btnPlay" type="button">▶ Tocar</button>
+          <div class="tempo">
+            <button type="button" id="bpmMenos" aria-label="Más lento">−</button>
+            <output id="bpmOut">70</output><small>negras<br>por minuto</small>
+            <button type="button" id="bpmMas" aria-label="Más rápido">+</button>
+          </div>
+        </div>
+        <input type="range" id="bpmRange" min="40" max="220" step="1" value="70" aria-label="Tempo">
+        <div class="chips">
+          <label class="chip"><input type="checkbox" id="chkMet" checked> Metrónomo</label>
+          <label class="chip"><input type="checkbox" id="chkCaj" checked> Sonido del cajón</label>
+          <label class="chip"><input type="checkbox" id="chkCuenta" checked> Cuenta de entrada</label>
+          <label class="chip" title="El metrónomo calla una vuelta de cada dos: tú mantienes el pulso"><input type="checkbox" id="chkHuecos"> Huecos de silencio</label>
+          <label class="chip"><input type="checkbox" id="chkSubir"> Subir +5 cada 4 vueltas hasta <input type="number" id="numTope" min="40" max="220" value="120"></label>
+        </div>
+        <div class="vol">
+          <label for="volMet">Metrónomo</label><input type="range" id="volMet" min="0" max="1" step="0.05" value="0.7">
+          <label for="volCaj">Cajón</label><input type="range" id="volCaj" min="0" max="1" step="0.05" value="0.9">
+        </div>
+        <details class="bt">
+          <summary>¿Auriculares Bluetooth? Ajusta el retraso</summary>
+          <div class="vol"><label for="retraso">Retraso <span id="retrasoOut">0</span> ms</label><input type="range" id="retraso" min="0" max="350" step="10" value="0"></div>
+          <p style="margin:6px 0 0">Sube el ajuste hasta que la animación caiga justo con el sonido.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="escalera">
+      <h2>Escalera de tempo</h2>
+      <p>Marca el tempo en el que este ejercicio te sale limpio, sin prisas y sin tensión.</p>
+      <div class="peldanos" id="peldanos"></div>
+      <div class="fila"><button class="btn-sec" type="button" id="btnLimpio">✓ Me sale limpio a 70</button><span id="mejor" style="font-size:13px;color:var(--muted)"></span></div>
+    </section>
+
+    <p class="proto">Prototipo. Los permisos de «Entrar como» están simulados: en la app de verdad cada alumno entra con su usuario y el profesor le abre los niveles. Los sonidos están sintetizados; se cambiarán por grabaciones de un cajón real.</p>
+  </main>
+</div>
+
+<script>
+/* ---------- ejercicios (del cuaderno) ----------
+   Cada golpe: letra del sonido (g grave, a agudo, p platillo, c caja, f fantasma), mano D/I y ^ si lleva acento; «-» es silencio.
+   compas = pulsos por compás; sub = golpes por pulso (1 negra, 2 corchea, 3 tresillo, 4 semicorchea). */
+const PARTES = { 1: 'Notas y ejercicios básicos', 2: 'Ejercicios con corcheas', 6: 'Dobles y paradiddles', 11: 'Soleá y alegrías' };
+const NIVELES = { 1: 'Nivel 1 · Primeros golpes', 2: 'Nivel 2 · Corcheas y manos', 3: 'Nivel 3 · Palos de 12' };
+const SOLEA = [3, 6, 8, 10, 12];
+const rep = (n, f) => Array.from({ length: n }, (_, i) => f(i)).join(' ');
+const EJ = [
+  { id: 'p1-solo', parte: 1, nivel: 1, titulo: 'Solo relleno', compas: 4, sub: 1, bpm: 70, txt: 'aD aI aD aI', nota: 'Mano alterna, todo agudo. Cuenta en voz alta 1, 2, 3, 4.' },
+  { id: 'p1-plat', parte: 1, nivel: 1, titulo: 'Platillo en los pulsos 1 y 3', compas: 4, sub: 1, bpm: 70, txt: 'pD aI pD aI', nota: 'La derecha va al platillo en el 1 y el 3; la izquierda sigue en el agudo.' },
+  { id: 'p1-ac1', parte: 1, nivel: 1, titulo: 'Relleno con acento 1', compas: 4, sub: 1, bpm: 70, txt: 'aD^ aI aD aI', nota: 'El acento, más fuerte; los demás golpes, iguales entre sí.' },
+  { id: 'p1-ac2', parte: 1, nivel: 1, titulo: 'Relleno con acento 2', compas: 4, sub: 1, bpm: 70, txt: 'aD^ aI^ aD aI' },
+  { id: 'p1-ac3', parte: 1, nivel: 1, titulo: 'Relleno con acento 3', compas: 4, sub: 1, bpm: 70, txt: 'aD^ aI^ aD^ aI' },
+  { id: 'p1-ac4', parte: 1, nivel: 1, titulo: 'Relleno con acento 4', compas: 4, sub: 1, bpm: 70, txt: 'aD^ aI^ aD^ aI^' },
+  { id: 'p1-gr1', parte: 1, nivel: 1, titulo: 'Relleno con graves 1', compas: 4, sub: 1, bpm: 70, txt: 'gD aI aD aI', nota: 'Grave: mano abierta y relajada hacia el centro de la tapa, dejando que el golpe rebote.' },
+  { id: 'p1-gr2', parte: 1, nivel: 1, titulo: 'Relleno con graves 2', compas: 4, sub: 1, bpm: 70, txt: 'gD gI aD aI' },
+  { id: 'p1-gr3', parte: 1, nivel: 1, titulo: 'Relleno con graves 3', compas: 4, sub: 1, bpm: 70, txt: 'gD gI gD aI' },
+  { id: 'p1-gr4', parte: 1, nivel: 1, titulo: 'Relleno con graves 4', compas: 4, sub: 1, bpm: 70, txt: 'gD gI gD gI' },
+  { id: 'p1-dag', parte: 1, nivel: 1, titulo: 'Dobles agudo', compas: 4, sub: 1, bpm: 70, txt: 'aD aD aI aI', nota: 'Los dobles se cantan pa-pa ma-ma: D D I I.' },
+  { id: 'p1-dgr', parte: 1, nivel: 1, titulo: 'Dobles grave', compas: 4, sub: 1, bpm: 70, txt: 'gD gD gI gI', nota: 'Los dobles se cantan pa-pa ma-ma: D D I I.' },
+  { id: 'p1-dmx', parte: 1, nivel: 1, titulo: 'Dobles mixtos', compas: 4, sub: 1, bpm: 70, txt: 'aD aD aI aI gD gD gI gI', nota: 'Un compás de agudos y otro de graves, sin parar el pulso.' },
+  { id: 'p2-cor', parte: 2, nivel: 2, titulo: 'Ejercicio con corcheas', compas: 4, sub: 2, bpm: 60, txt: 'aD aD aI aI aD aI aD aI', nota: 'Cada pulso se divide en dos: el pulso y la «y». La «y» cae justo en la mitad.' },
+  { id: 'p2-ds1', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 1', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD aI aD - aD -', nota: 'La derecha toca en el pulso y la izquierda en la «y». Mantén la mano en movimiento aunque no suene.' },
+  { id: 'p2-ds2', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 2', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD - aD aI aD -' },
+  { id: 'p2-ds5', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 5', compas: 4, sub: 2, bpm: 60, txt: 'aD - aD aI aD aI aD aI' },
+  { id: 'p2-ds7', parte: 2, nivel: 2, titulo: 'Dobles + sencillos 7', compas: 4, sub: 2, bpm: 60, txt: 'aD aI aD aI aD aI aD -' },
+  { id: 'p6-dag', parte: 6, nivel: 2, titulo: 'Dobles con corcheas · agudo', compas: 4, sub: 2, bpm: 60, txt: 'aD aD aI aI aD aD aI aI', nota: 'Empieza despacio y sube el tempo poco a poco.' },
+  { id: 'p6-dmx', parte: 6, nivel: 2, titulo: 'Dobles con corcheas · mixto', compas: 4, sub: 2, bpm: 60, txt: 'gD aD gI aI gD aD gI aI', nota: 'El primero de cada doble, grave; el segundo, agudo.' },
+  { id: 'p6-par', parte: 6, nivel: 2, titulo: 'Paradiddle sencillo', compas: 4, sub: 4, bpm: 50, txt: 'aD aI aD aD aI aD aI aI aD aI aD aD aI aD aI aI', nota: 'D I D D · I D I I. La primera mano de cada grupo cambia en cada pulso.' },
+  { id: 'p6-pac', parte: 6, nivel: 2, titulo: 'Paradiddle con acento', compas: 4, sub: 4, bpm: 50, txt: 'aD^ aI aD aD aI^ aD aI aI aD^ aI aD aD aI^ aD aI aI', nota: 'El acento «viaja» de una mano a la otra en cada pulso.' },
+  { id: 'p11-neg', parte: 11, nivel: 3, titulo: 'Soleá · base con negras', compas: 12, sub: 1, bpm: 90,
+    txt: rep(12, i => (SOLEA.includes(i + 1) ? 'g^' : 'a')), nota: 'Cuenta del 1 al 12 con acentos en 3 · 6 · 8 · 10 · 12. El metrónomo marca esos acentos.' },
+  { id: 'p11-cor', parte: 11, nivel: 3, titulo: 'Soleá con corcheas', compas: 12, sub: 2, bpm: 70,
+    txt: rep(12, i => (SOLEA.includes(i + 1) ? 'gD^' : 'aD') + ' aI'), nota: 'Las alegrías llevan el mismo compás y acentos a tempo vivo: sube el metrónomo poco a poco.' },
+];
+const ROLES = { n1: 1, n2: 2, n3: 3, prof: 99 };
+
+/* ---------- guardado en el navegador ---------- */
+function leer(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin guardado */ } }
+
+const $ = s => document.querySelector(s);
+let rol = leer('cajon_rol', 'n1');
+let escalera = leer('cajon_escalera', {});
+let cur = null, pasos = [], geo = null, bpm = 70;
+
+function parse(ex) {
+  return ex.txt.trim().split(/\s+/).map(t => t === '-' ? { s: null }
+    : { s: t[0], m: (t.match(/[DI]/) || [])[0] || null, ac: t.includes('^') });
+}
+const permitido = ex => ex.nivel <= ROLES[rol];
+
+/* ---------- lista de ejercicios ---------- */
+function pintarLista() {
+  let html = '', opts = '';
+  for (const n of [1, 2, 3]) {
+    html += `<div class="niv"><h3>${NIVELES[n]}${ROLES[rol] < n ? ' 🔒' : ''}</h3>`;
+    opts += `<optgroup label="${NIVELES[n]}${ROLES[rol] < n ? ' 🔒' : ''}">`;
+    let parte = 0;
+    for (const ex of EJ.filter(e => e.nivel === n)) {
+      if (ex.parte !== parte) { parte = ex.parte; html += `<div class="parte">Parte ${parte} · ${PARTES[parte]}</div>`; }
+      const ok = permitido(ex), b = escalera[ex.id];
+      html += `<button class="ej" type="button" data-id="${ex.id}" ${ok ? '' : 'disabled'} aria-current="${cur && cur.id === ex.id}">
+        <span>${ok ? '' : '🔒 '}${ex.titulo}</span>${b ? `<span class="bpm">♩ ${b}</span>` : ''}</button>`;
+      opts += `<option value="${ex.id}" ${ok ? '' : 'disabled'} ${cur && cur.id === ex.id ? 'selected' : ''}>${ok ? '' : '🔒 '}${ex.titulo}</option>`;
+    }
+    html += '</div>'; opts += '</optgroup>';
+  }
+  html += `<div class="aviso-rol">${rol === 'prof' ? 'Como profesor ves todos los niveles.' : 'Los niveles con 🔒 los abre tu profesor cuando subes la escalera de tempo.'}</div>`;
+  $('#lista').innerHTML = html;
+  $('#selMovil').innerHTML = opts;
+}
+$('#lista').addEventListener('click', e => { const b = e.target.closest('.ej'); if (b && !b.disabled) elegir(b.dataset.id); });
+$('#selMovil').addEventListener('change', e => elegir(e.target.value));
+$('#selRol').value = rol;
+$('#selRol').addEventListener('change', e => {
+  rol = e.target.value; guardar('cajon_rol', rol);
+  if (!permitido(cur)) elegir(EJ.find(permitido).id); else pintarLista();
+});
+
+/* ---------- partitura ---------- */
+const PAD = 22, L = 62, ROWH = 112;
+function geometria(ex) {
+  const beatW = { 1: 84, 2: 112, 3: 132, 4: 150 }[ex.sub];
+  const total = pasos.length / ex.sub;
+  let porFila = ex.compas === 12 ? 6 : (ex.sub === 1 ? 8 : 4);
+  porFila = Math.min(porFila, total);
+  const filas = Math.ceil(total / porFila);
+  return { beatW, porFila, filas, W: PAD * 2 + porFila * beatW, H: filas * ROWH + 6 };
+}
+function pos(i) {
+  const s = cur.sub, beat = Math.floor(i / s), fila = Math.floor(beat / geo.porFila), b = beat % geo.porFila;
+  return { x: PAD + 14 + b * geo.beatW + (i % s) * geo.beatW / s, y: fila * ROWH, fila };
+}
+function glifo(p, x, y) {
+  const l = y + L;
+  if (!p.s) {
+    return cur.sub === 1
+      ? `<path class="nota" d="M${x - 3} ${l - 16}l6 7-6 6 6 7q-7-2-4 6" fill="none" stroke="currentColor" stroke-width="2"/>`
+      : `<g class="nota"><circle cx="${x - 2}" cy="${l - 9}" r="2.6" fill="currentColor"/><path d="M${x + 3} ${l - 10}L${x - 2} ${l + 6}" stroke="currentColor" stroke-width="1.8"/></g>`;
+  }
+  const tallo = (y0) => `<line x1="${x + 5.5}" y1="${y0}" x2="${x + 5.5}" y2="${y + 20}" stroke="currentColor" stroke-width="1.6"/>`;
+  let cab = '', t0 = l - 5;
+  if (p.s === 'g') { cab = `<ellipse cx="${x}" cy="${l}" rx="6.5" ry="4.6" transform="rotate(-20 ${x} ${l})" fill="currentColor"/>`; t0 = l - 2; }
+  else if (p.s === 'a') cab = `<path d="M${x - 5} ${l - 5}L${x + 5} ${l + 5}M${x + 5} ${l - 5}L${x - 5} ${l + 5}" stroke="currentColor" stroke-width="2.2"/>`;
+  else if (p.s === 'f') cab = `<text x="${x}" y="${l + 4}" text-anchor="middle" font-size="12" fill="currentColor">(×)</text>`;
+  else if (p.s === 'p') { cab = `<path d="M${x} ${l - 6}L${x + 6} ${l}L${x} ${l + 6}L${x - 6} ${l}Z" fill="var(--surface)" stroke="currentColor" stroke-width="1.8"/>`; t0 = l; }
+  else if (p.s === 'c') cab = `<circle cx="${x}" cy="${l}" r="6" fill="var(--surface)" stroke="currentColor" stroke-width="1.6"/><path d="M${x - 4} ${l - 4}L${x + 4} ${l + 4}M${x + 4} ${l - 4}L${x - 4} ${l + 4}" stroke="currentColor" stroke-width="1.4"/>`;
+  return `<g class="nota">${cab}${tallo(t0)}</g>`;
+}
+function pintarPartitura() {
+  geo = geometria(cur);
+  const s = cur.sub; let o = '';
+  for (let f = 0; f < geo.filas; f++) {
+    const y = f * ROWH, x1 = PAD + geo.porFila * geo.beatW;
+    o += `<line class="lin" x1="${PAD}" y1="${y + L}" x2="${x1}" y2="${y + L}"/>`;
+    o += `<line class="barra" x1="${x1}" y1="${y + L - 12}" x2="${x1}" y2="${y + L + 12}"/>`;
+    for (let b = 0; b < geo.porFila; b++) {
+      const beat = f * geo.porFila + b;
+      if (b === 0 || beat % cur.compas === 0) { const bx = PAD + b * geo.beatW; o += `<line class="barra" x1="${bx}" y1="${y + L - 12}" x2="${bx}" y2="${y + L + 12}"/>`; }
+    }
+  }
+  pasos.forEach((p, i) => {
+    const { x, y } = pos(i), beat = Math.floor(i / s), enPulso = i % s === 0;
+    const num = cur.compas === 12 ? (beat % 12) + 1 : (beat % cur.compas) + 1;
+    const cuenta = enPulso ? `<text class="cuenta" x="${x}" y="${y + L + 40}">${num}</text>`
+      : s === 2 ? `<text class="cuenta y" x="${x}" y="${y + L + 40}">y</text>` : '';
+    const mano = p.m ? `<text class="mano ${p.m}" x="${x}" y="${y + L + 24}">${p.m}</text>` : '';
+    const ac = p.ac ? `<path class="ac" d="M${x} ${y + 8}l5 6m-5-6l-5 6" transform="translate(5.5 0)"/>` : '';
+    o += `<g class="st" data-i="${i}"><rect class="hl" x="${x - 15}" y="${y + 2}" width="${30 + 6}" height="${ROWH - 16}" rx="6"/>${ac}${glifo(p, x, y)}${mano}${cuenta}</g>`;
+  });
+  if (s > 1) for (let b = 0; b < pasos.length / s; b++) {   /* barras de corcheas, tresillos y semicorcheas */
+    const idx = []; for (let k = 0; k < s; k++) if (pasos[b * s + k].s) idx.push(b * s + k);
+    if (idx.length < 2) continue;
+    const a = pos(idx[0]), z = pos(idx[idx.length - 1]), y = a.y + 20;
+    o += `<rect x="${a.x + 4.7}" y="${y}" width="${z.x - a.x + 1.6}" height="4" fill="var(--ink)"/>`;
+    if (s === 4) o += `<rect x="${a.x + 4.7}" y="${y + 7}" width="${z.x - a.x + 1.6}" height="3.5" fill="var(--ink)"/>`;
+    if (s === 3) o += `<text class="tres" x="${(a.x + z.x) / 2 + 5}" y="${y - 4}">3</text>`;
+  }
+  o += '<line class="cursor" id="cursor" x1="0" y1="0" x2="0" y2="0"/>';
+  const svg = $('#partitura');
+  svg.setAttribute('viewBox', `0 0 ${geo.W} ${geo.H}`);
+  svg.style.maxWidth = Math.round(geo.W * 1.35) + 'px';
+  svg.style.minWidth = geo.W > 520 ? '520px' : '0';   /* las filas largas se deslizan de lado en el móvil */
+  svg.innerHTML = o;
+}
+
+/* ---------- elegir ejercicio ---------- */
+function elegir(id) {
+  parar();
+  cur = EJ.find(e => e.id === id); pasos = parse(cur);
+  $('#ejParte').textContent = `Parte ${cur.parte} · ${PARTES[cur.parte]}`;
+  $('#ejTitulo').textContent = cur.titulo;
+  const nota = $('#ejNota');
+  nota.innerHTML = cur.nota ? `<b>Consejo</b>${cur.nota}` : '';
+  nota.hidden = !cur.nota;
+  setBpm(cur.bpm);
+  pintarPartitura(); pintarLista(); pintarEscalera();
+  guardar('cajon_ultimo', id);
+}
+
+/* ---------- tempo ---------- */
+function setBpm(v) {
+  bpm = Math.max(40, Math.min(220, Math.round(v)));
+  $('#bpmOut').textContent = bpm; $('#bpmRange').value = bpm;
+  $('#btnLimpio').textContent = `✓ Me sale limpio a ${bpm}`;
+}
+$('#bpmRange').addEventListener('input', e => setBpm(+e.target.value));
+$('#bpmMenos').addEventListener('click', () => setBpm(bpm - 5));
+$('#bpmMas').addEventListener('click', () => setBpm(bpm + 5));
+
+/* ---------- sonido (sintetizado) ---------- */
+let ctx, busMet, busCaj, ruido;
+function audio() {
+  if (ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const master = ctx.createGain(); master.connect(ctx.destination);
+  busMet = ctx.createGain(); busCaj = ctx.createGain();
+  busMet.connect(master); busCaj.connect(master); volumenes();
+  ruido = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  const d = ruido.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+function volumenes() { if (!ctx) return; busMet.gain.value = +$('#volMet').value; busCaj.gain.value = +$('#volCaj').value; }
+$('#volMet').addEventListener('input', volumenes); $('#volCaj').addEventListener('input', volumenes);
+function env(g, t, pico, dec) {
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(pico, 0.0002), t + 0.003);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
+}
+function ruidoF(t, tipo, fr, q, pico, dec) {
+  const src = ctx.createBufferSource(); src.buffer = ruido;
+  const f = ctx.createBiquadFilter(); f.type = tipo; f.frequency.value = fr; f.Q.value = q;
+  const g = ctx.createGain(); env(g, t, pico, dec);
+  src.connect(f).connect(g).connect(busCaj); src.start(t); src.stop(t + dec + 0.05);
+}
+function tono(t, f0, f1, tipo, pico, dec, bus) {
+  const o = ctx.createOscillator(); o.type = tipo;
+  o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dec * 0.6);
+  const g = ctx.createGain(); env(g, t, pico, dec);
+  o.connect(g).connect(bus); o.start(t); o.stop(t + dec + 0.05);
+}
+const SON = {
+  g: (t, v) => { tono(t, 125, 52, 'sine', 0.95 * v, 0.4, busCaj); ruidoF(t, 'lowpass', 500, 0.7, 0.3 * v, 0.05); },
+  a: (t, v) => { ruidoF(t, 'bandpass', 2300, 0.9, 0.75 * v, 0.09); ruidoF(t, 'highpass', 5000, 0.5, 0.28 * v, 0.2); tono(t, 340, 260, 'triangle', 0.25 * v, 0.05, busCaj); },
+  f: (t) => SON.a(t, 0.16),
+  p: (t, v) => { ruidoF(t, 'highpass', 6500, 0.3, 0.4 * v, 0.9); ruidoF(t, 'bandpass', 9500, 2, 0.22 * v, 0.5); },
+  c: (t, v) => { ruidoF(t, 'bandpass', 1500, 1, 0.6 * v, 0.14); ruidoF(t, 'highpass', 4000, 0.5, 0.3 * v, 0.17); tono(t, 220, 180, 'triangle', 0.35 * v, 0.08, busCaj); },
+};
+const click = (t, fuerte) => tono(t, fuerte ? 1760 : 1180, fuerte ? 1700 : 1150, 'sine', fuerte ? 0.6 : 0.35, 0.035, busMet);
+
+/* ---------- reproductor: se programa el audio por delante y la animación lo sigue ---------- */
+const R = { on: false, sig: 0, i: 0, vuelta: 0, entrada: 0, entradaTot: 0, timer: 0, cola: [], ult: null, lock: null };
+const fuerte = inBar => cur.compas === 12 ? SOLEA.includes(inBar + 1) : inBar === 0;
+function programar() {
+  while (R.sig < ctx.currentTime + 0.12) {
+    const pulso = 60 / bpm;
+    if (R.entrada > 0) {
+      const n = R.entradaTot - R.entrada + 1;
+      click(R.sig, n === 1);
+      R.cola.push({ t: R.sig, entrada: n }); R.sig += pulso; R.entrada--; continue;
+    }
+    const p = pasos[R.i], t = R.sig, beat = Math.floor(R.i / cur.sub);
+    if (R.i % cur.sub === 0 && $('#chkMet').checked && !($('#chkHuecos').checked && R.vuelta % 2 === 1)) click(t, fuerte(beat % cur.compas));
+    if (p.s && $('#chkCaj').checked) SON[p.s](t, p.ac ? 1 : 0.6);
+    R.cola.push({ t, i: R.i, dur: pulso / cur.sub, vuelta: R.vuelta });
+    R.sig += pulso / cur.sub;
+    if (++R.i >= pasos.length) { R.i = 0; R.vuelta++; finVuelta(); }
+  }
+}
+function finVuelta() {
+  if ($('#chkSubir').checked && R.vuelta % 4 === 0 && bpm < +$('#numTope').value) setBpm(Math.min(bpm + 5, +$('#numTope').value));
+}
+function tocar() {
+  audio(); ctx.resume();
+  Object.assign(R, { on: true, i: 0, vuelta: 0, cola: [], ult: null, sig: ctx.currentTime + 0.15 });
+  R.entradaTot = R.entrada = $('#chkCuenta').checked ? (cur.compas === 3 ? 3 : 4) : 0;
+  R.timer = setInterval(programar, 25); programar();
+  $('#btnPlay').textContent = '■ Parar'; $('#btnPlay').classList.add('parar');
+  $('#partitura').classList.add('tocando');
+  if (navigator.wakeLock) navigator.wakeLock.request('screen').then(l => { R.lock = l; }).catch(() => {});
+  requestAnimationFrame(cuadro);
+}
+function parar() {
+  if (!R.on) return;
+  R.on = false; clearInterval(R.timer); R.cola = [];
+  document.querySelectorAll('.st.on').forEach(e => e.classList.remove('on'));
+  $('#btnPlay').textContent = '▶ Tocar'; $('#btnPlay').classList.remove('parar');
+  $('#partitura').classList.remove('tocando');
+  $('#cNum').textContent = '·'; $('#cNum').className = 'n'; $('#cInfo').textContent = 'Pulsa Tocar';
+  manosReposo();
+  if (R.lock) { R.lock.release().catch(() => {}); R.lock = null; }
+}
+$('#btnPlay').addEventListener('click', () => R.on ? parar() : tocar());
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !e.target.closest('input, select, button, summary')) { e.preventDefault(); R.on ? parar() : tocar(); }
+});
+
+function cuadro() {
+  if (!R.on) return;
+  const ahora = ctx.currentTime - (ctx.outputLatency || 0) - (+$('#retraso').value) / 1000;
+  while (R.cola.length && R.cola[0].t <= ahora) {
+    const e = R.cola.shift();
+    if (e.entrada) {
+      $('#cNum').textContent = e.entrada; $('#cNum').className = 'n entrada';
+      $('#cInfo').textContent = 'Cuenta de entrada';
+    } else golpe(e);
+  }
+  if (R.ult) {   /* el cursor avanza suave hasta el golpe siguiente */
+    const a = pos(R.ult.i), sigI = (R.ult.i + 1) % pasos.length, b = pos(sigI);
+    const fr = Math.min(1, Math.max(0, (ahora - R.ult.t) / R.ult.dur));
+    const x = b.fila === a.fila && sigI > R.ult.i ? a.x + (b.x - a.x) * fr : a.x + (geo.beatW / cur.sub) * fr;
+    const c = $('#cursor');
+    c.setAttribute('x1', x); c.setAttribute('x2', x); c.setAttribute('y1', a.y + 6); c.setAttribute('y2', a.y + ROWH - 18);
+  }
+  requestAnimationFrame(cuadro);
+}
+function golpe(e) {
+  R.ult = e;
+  document.querySelectorAll('.st.on').forEach(el => el.classList.remove('on'));
+  const g = document.querySelector(`.st[data-i="${e.i}"]`); if (g) g.classList.add('on');
+  const p = pasos[e.i], s = cur.sub;
+  if (e.i % s === 0) {
+    const beat = Math.floor(e.i / s), n = cur.compas === 12 ? (beat % 12) + 1 : (beat % cur.compas) + 1;
+    $('#cNum').textContent = n; $('#cNum').className = 'n' + (fuerte(beat % cur.compas) ? ' fuerte' : '');
+    $('#cInfo').textContent = `Vuelta ${e.vuelta + 1}` + ($('#chkHuecos').checked && e.vuelta % 2 ? ' · sin metrónomo' : '');
+  }
+  const mano = p.m || (e.i % 2 ? 'I' : 'D');
+  mover(mano, p);
+}
+
+/* ---------- tapa del cajón: manos y ondas ---------- */
+const SITIO = {
+  a: { D: [175, 50], I: [85, 50] }, f: { D: [175, 50], I: [85, 50] },
+  g: { D: [152, 168], I: [108, 168] },
+  p: { D: [262, 70], I: [262, 70] }, c: { D: [268, 182], I: [268, 182] },
+  reposo: { D: [178, 245], I: [82, 245] },
+};
+function ponerMano(m, [x, y]) { const el = $('#mano' + m); el.setAttribute('transform', `translate(${x} ${y})`); return el; }
+function manosReposo() {
+  for (const m of ['D', 'I']) ponerMano(m, SITIO.reposo[m]).classList.add('reposo');
+}
+function mover(m, p) {
+  if (!p.s) {   /* silencio: la mano sigue el movimiento sin tocar */
+    const [x, y] = SITIO.a[m]; ponerMano(m, [x, y + 28]).classList.add('reposo'); return;
+  }
+  const xy = SITIO[p.s][m], el = ponerMano(m, xy);
+  el.classList.remove('reposo');
+  const otra = m === 'D' ? 'I' : 'D';
+  $('#mano' + otra).classList.add('reposo');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const onda = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  onda.setAttribute('cx', xy[0]); onda.setAttribute('cy', xy[1]); onda.setAttribute('r', 10);
+  onda.setAttribute('fill', 'none'); onda.setAttribute('stroke', p.ac ? 'var(--red)' : 'var(--ink)');
+  onda.setAttribute('stroke-width', p.ac ? 4 : 2);
+  $('#ondas').appendChild(onda);
+  const fin = p.s === 'f' ? 22 : p.ac ? 60 : p.s === 'g' ? 48 : 36;
+  onda.animate([{ r: 10, opacity: p.s === 'f' ? 0.35 : 0.8 }, { r: fin, opacity: 0 }], { duration: p.s === 'g' ? 520 : 360, easing: 'ease-out' })
+    .onfinish = () => onda.remove();
+}
+
+/* ---------- escalera de tempo ---------- */
+const TEMPOS = [60, 70, 80, 90, 100, 110, 120];
+function pintarEscalera() {
+  const b = escalera[cur.id] || 0;
+  $('#peldanos').innerHTML = TEMPOS.map((t, k) =>
+    `<button type="button" class="peldano${b >= t ? ' hecho' : ''}" data-t="${t}" style="height:${30 + k * 9}px" title="Me sale limpio a ${t}">${t}</button>`).join('');
+  $('#mejor').textContent = b ? `Tu mejor tempo limpio: ♩ ${b}` : 'Aún sin marcar';
+}
+function marcar(t) {
+  escalera[cur.id] = escalera[cur.id] === t ? 0 : t;
+  if (!escalera[cur.id]) delete escalera[cur.id];
+  guardar('cajon_escalera', escalera); pintarEscalera(); pintarLista();
+}
+$('#peldanos').addEventListener('click', e => { const b = e.target.closest('.peldano'); if (b) { setBpm(+b.dataset.t); marcar(+b.dataset.t); } });
+$('#btnLimpio').addEventListener('click', () => { escalera[cur.id] = Math.max(escalera[cur.id] || 0, bpm); guardar('cajon_escalera', escalera); pintarEscalera(); pintarLista(); });
+$('#retraso').addEventListener('input', e => { $('#retrasoOut').textContent = e.target.value; });
+
+/* ---------- arranque ---------- */
+const ultimo = EJ.find(e => e.id === leer('cajon_ultimo', '') && permitido(e));
+elegir((ultimo || EJ.find(permitido)).id);
+manosReposo();
+</script>
+
+</body>
+</html>
