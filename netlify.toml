@@ -1,0 +1,9 @@
+# Netlify publica la carpeta web/ (la genera build.py y se sube ya hecha al repositorio).
+[build]
+  publish = "web"
+  command = ""
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
