@@ -48,12 +48,12 @@ pwa = ('<link rel="manifest" href="manifest.webmanifest">\n'
 for f in ["icono-192.png", "icono-512.png", "icono-180.png", "icono-mask-192.png", "icono-mask-512.png"]:
     shutil.copy(raiz / "assets" / f, web / f)
 manifiesto = {
-    "id": "./",
+    "id": "./?app=elbarri",
     "name": "El Barri · Cajón flamenco",
     "short_name": "El Barri",
     "description": "Cuaderno de ejercicios de cajón flamenco: partitura, sonido, tapa animada y metrónomo.",
     "lang": "es",
-    "start_url": "./",
+    "start_url": "./?app=elbarri",
     "scope": "./",
     "display": "standalone",
     "background_color": "#000000",
@@ -67,7 +67,7 @@ manifiesto = {
 }
 (web / "manifest.webmanifest").write_text(json.dumps(manifiesto, ensure_ascii=False, indent=2), encoding="utf-8")
 # service worker: siempre intenta bajar la versión nueva; si no hay internet, usa la guardada
-(web / "sw.js").write_text("""const CACHE = 'el-barri-v2';
+(web / "sw.js").write_text("""const CACHE = 'el-barri-v3';
 self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {

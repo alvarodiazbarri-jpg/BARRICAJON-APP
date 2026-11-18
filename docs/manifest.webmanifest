@@ -1,10 +1,10 @@
 {
-  "id": "./",
+  "id": "./?app=elbarri",
   "name": "El Barri · Cajón flamenco",
   "short_name": "El Barri",
   "description": "Cuaderno de ejercicios de cajón flamenco: partitura, sonido, tapa animada y metrónomo.",
   "lang": "es",
-  "start_url": "./",
+  "start_url": "./?app=elbarri",
   "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
