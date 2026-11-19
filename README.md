@@ -20,5 +20,5 @@ App para practicar el cajón con los ejercicios del cuaderno: partitura, sonido,
 
 1. Transcribir todo el cuaderno (rumbas, tangos, bulerías, sevillanas, chirigota, rellenos, lectura a primera vista…) y editor de ejercicios.
 2. Inicio de sesión y niveles de verdad (ejercicios en el servidor, con reglas por nivel), panel del profesor y tarea semanal.
-3. Sonidos grabados de un cajón real.
+3. ~~Sonidos grabados de un cajón real~~ ✅ grave y agudo (suave y fuerte) en `assets/sonidos/`; faltan platillo y caja.
 4. Escuchar al alumno por el micrófono para medir el ritmo.

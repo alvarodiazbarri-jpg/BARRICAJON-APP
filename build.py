@@ -27,6 +27,11 @@ def pagina(c):
 
 # el logo y los iconos van dentro de la página para que sea un solo archivo
 cuerpo = cuerpo.replace("{{logo}}", dato("logo.jpg", "image/jpeg"))
+# sonidos grabados: assets/sonidos/<sonido>-<suave|fuerte>-<n>.wav → { "grave-fuerte": [data:…, …], … }
+sonidos = {}
+for f in sorted((raiz / "assets" / "sonidos").glob("*.wav")):
+    sonidos.setdefault(f.stem.rsplit("-", 1)[0], []).append(dato("sonidos/" + f.name, "audio/wav"))
+cuerpo = cuerpo.replace("{{sonidos}}", json.dumps(sonidos))
 # en la cabecera, el icono como archivo en la app instalable y dentro de la página en la versión de un solo archivo
 cuerpo_web = cuerpo.replace("{{icono180}}", "icono-180.png").replace("{{icono64}}", "icono-192.png")
 for marca, nombre, tipo in [("{{icono180}}", "icono-180.png", "image/png"), ("{{icono64}}", "icono-64.png", "image/png")]:

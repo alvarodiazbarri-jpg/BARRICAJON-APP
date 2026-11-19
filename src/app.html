@@ -570,6 +570,7 @@ function audio() {
   satur.curve = curva; satur.oversample = '2x';
   busMet = ctx.createGain(); busCaj = ctx.createGain();
   busMet.connect(master); busCaj.connect(master); satur.connect(busCaj); volumenes();
+  cargarMuestras();
   ruido = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const d = ruido.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
 }
@@ -592,8 +593,29 @@ function tono(t, f0, f1, tipo, pico, dec, bus) {
   const g = ctx.createGain(); env(g, t, pico, dec);
   o.connect(g).connect(bus); o.start(t); o.stop(t + dec + 0.05);
 }
+/* sonidos grabados del cajón de Barri (si se han cargado, sustituyen a los sintetizados) */
+const GRABADOS = {{sonidos}};
+const MUESTRAS = {}; let turnoMuestra = 0;
+function cargarMuestras() {
+  for (const [nombre, tomas] of Object.entries(GRABADOS)) {
+    MUESTRAS[nombre] = [];
+    tomas.forEach(url => {
+      const bin = atob(url.split(',')[1]), buf = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      ctx.decodeAudioData(buf.buffer, b => MUESTRAS[nombre].push(b), () => {});
+    });
+  }
+}
+function muestra(t, nombre, gan) {
+  const tomas = MUESTRAS[nombre]; if (!tomas || !tomas.length) return false;
+  const src = ctx.createBufferSource(); src.buffer = tomas[turnoMuestra++ % tomas.length];
+  const g = ctx.createGain(); g.gain.value = gan;
+  src.connect(g).connect(busCaj); src.start(t); return true;
+}
+/* golpe normal (0.6) → toma suave; acento (1) → toma fuerte; las dinámicas ajustan el volumen */
+const real = (t, son, v) => v >= 0.8 ? muestra(t, son + '-fuerte', v) : muestra(t, son + '-suave', Math.min(1, v * 1.5));
 const SON = {
-  g: (t, v) => {   /* bombo del cajón: cuerpo grave + armónicos (saturados) + golpe de la palma */
+  g: (t, v) => { if (real(t, 'grave', v)) return;   /* bombo del cajón: cuerpo grave + armónicos (saturados) + golpe de la palma */
     v *= 0.6;
     tono(t, 140, 70, 'sine', 0.5 * v, 0.35, busCaj);
     tono(t, 150, 80, 'sine', 0.45 * v, 0.28, satur);
@@ -601,8 +623,8 @@ const SON = {
     ruidoF(t, 'bandpass', 260, 1.2, 0.6 * v, 0.09);
     ruidoF(t, 'lowpass', 900, 0.7, 0.2 * v, 0.03);
   },
-  a: (t, v) => { ruidoF(t, 'bandpass', 2300, 0.9, 0.75 * v, 0.09); ruidoF(t, 'highpass', 5000, 0.5, 0.28 * v, 0.2); tono(t, 340, 260, 'triangle', 0.25 * v, 0.05, busCaj); },
-  f: (t) => SON.a(t, 0.16),
+  a: (t, v) => { if (real(t, 'agudo', v)) return; ruidoF(t, 'bandpass', 2300, 0.9, 0.75 * v, 0.09); ruidoF(t, 'highpass', 5000, 0.5, 0.28 * v, 0.2); tono(t, 340, 260, 'triangle', 0.25 * v, 0.05, busCaj); },
+  f: (t) => { if (!muestra(t, 'agudo-suave', 0.22)) SON.a(t, 0.16); },
   p: (t, v) => { ruidoF(t, 'highpass', 6500, 0.3, 0.4 * v, 0.9); ruidoF(t, 'bandpass', 9500, 2, 0.22 * v, 0.5); },
   c: (t, v) => { ruidoF(t, 'bandpass', 1500, 1, 0.6 * v, 0.14); ruidoF(t, 'highpass', 4000, 0.5, 0.3 * v, 0.17); tono(t, 220, 180, 'triangle', 0.35 * v, 0.08, busCaj); },
 };
