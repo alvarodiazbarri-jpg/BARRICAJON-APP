@@ -631,7 +631,7 @@ const SON = {
     ruidoF(t, 'lowpass', 900, 0.7, 0.2 * v, 0.03);
   },
   a: (t, v) => { if (real(t, 'agudo', v)) return; ruidoF(t, 'bandpass', 2300, 0.9, 0.75 * v, 0.09); ruidoF(t, 'highpass', 5000, 0.5, 0.28 * v, 0.2); tono(t, 340, 260, 'triangle', 0.25 * v, 0.05, busCaj); },
-  f: (t) => { if (!muestra(t, 'agudo-suave', 0.22)) SON.a(t, 0.16); },
+  f: (t, v) => SON.a(t, Math.min(v, 0.6)),   /* fantasma = golpe flojo de relleno, igual que cualquier golpe sin acento */
   p: (t, v) => { ruidoF(t, 'highpass', 6500, 0.3, 0.4 * v, 0.9); ruidoF(t, 'bandpass', 9500, 2, 0.22 * v, 0.5); },
   c: (t, v) => { ruidoF(t, 'bandpass', 1500, 1, 0.6 * v, 0.14); ruidoF(t, 'highpass', 4000, 0.5, 0.3 * v, 0.17); tono(t, 220, 180, 'triangle', 0.35 * v, 0.08, busCaj); },
 };
